@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.93.1" />
+
+
+<title>character in UTF-8 - R to the max</title>
+<meta property="og:title" content="character in UTF-8 - R to the max">
+
+
+  <link href='https://kwhkim.github.io/maxR/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/maxR/css/fonts.css" media="all">
+<link rel="stylesheet" href="/maxR/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/maxR/" class="nav-logo">
+    <img src="/maxR/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/maxR/about/">About</a></li>
+    
+    <li><a href="/maxR/categories/">Categories</a></li>
+    
+    <li><a href="/maxR/tags/">Tags</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">5 min read</span>
+    
+
+    <h1 class="article-title">character in UTF-8</h1>
+
+    
+    <span class="article-date">2022-03-06</span>
+    
+
+    <div class="article-content">
+      
+<script src="https://kwhkim.github.io/maxR/2022/03/06/character-in-utf-8/index_files/header-attrs/header-attrs.js"></script>
+
+
+<div id="encoding" class="section level2">
+<h2>Encoding</h2>
+<p>Computer can store data only with 0s and 1s. Putting together a lot of 0s and 1s, a computer can present a bigger number. But if it want to store a letter, it needs a mapping of a number onto a letter. This mapping is called “<strong>encoding</strong>”.</p>
+<p><strong>Encoding</strong> depends on the letters to store. Letters people use are different for different countries and languages. There are over 1000 encodings worldwide. But over 90% of the encodings used in the internet is UTF-8<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
+</div>
+<div id="unicode" class="section level2">
+<h2>Unicode</h2>
+<p>We are in an internet era. It has become ordinary to send documents over the border of a country. But encodings usually were made for use in one country. So the documents from foreign country could be not read properly because the encoding was different<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>.</p>
+<p>Unicode was developed for this kind of problem. Unicode tries to have a mapping for all the characters that exist today or existed from the beginning of the history. Unicode Consortium<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> is a non-profit oganization that develops Unicode. The number that a character maps to is called <strong>code point</strong>. You can check the Code points from <strong>Unicode Code Chart</strong><a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>. As the Unicode version increases, the number of character that Unicode can represent is also increasing<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>.</p>
+<p>Version 1.0.0(1991) supported 7129 characters from 24 languages. Version 14(2021) includes 144,697 characters from 159 languages. Version 6.0(2010 decided to support emojis because celluar phone makers demanded and it could have evloved into different encodings for different phone makers because of emojis, which was the reason for Unicode. Unicode tried to incorporate all the characters worldwide so any encodings can be converted to Unicode. Unicode can be materialized into specific encoding scheme such as UTF-8, UTF-16, UTF-32. Those encoding scheme add additional layer for compression.</p>
+</div>
+<div id="character-in-r" class="section level2">
+<h2><code>character</code> in R</h2>
+<p>R supports UTF-8. If a <code>character</code> is not in UTF-8, it can be converted to UTF-8 using the following code.</p>
+<pre class="r"><code>x = &#39;한글&#39; # Hangul in Korean
+y = iconv(x, to=&#39;UTF-8&#39;)
+x
+## [1] &quot;한글&quot;
+y
+## [1] &quot;한글&quot;
+Encoding(x)
+## [1] &quot;unknown&quot;
+Encoding(y)
+## [1] &quot;UTF-8&quot;</code></pre>
+<p>UTF-8 is powerful. It can represent almost any characters. But the font is limited. Most fonts can not display all the characters. So there are cases that characters stored in a vector can not be properly displayed because the font in use does not support.</p>
+<p>I propose the following function <code>u_chars</code> for inspection of UTF-8 characters.</p>
+</div>
+<div id="u_chars" class="section level2">
+<h2><code>u_chars</code></h2>
+<p>The following function <code>u_chars()</code> utilize the package <code>Unicode</code> and prints out the information of each character for a string. Unicode characters have labels so characters that can be not displayed properly can be identified.</p>
+<pre class="r"><code>u_chars = function(s, encodings) {
+  stopifnot(class(s) == &quot;character&quot;)
+  stopifnot(length(s)==1)
+  if (Encoding(s) == &quot;unknown&quot;) {
+    s = iconv(s, to = &#39;UTF-8&#39;)
+  } else if (Encoding(s) != &#39;UTF-8&#39;) {
+    s = iconv(s, from = Encoding(s), to=&#39;UTF-8&#39;)  } 
+  
+  dat = data.frame(ch = unlist(strsplit(s, &quot;&quot;))) # split characters
+  cps = sapply(dat$ch, utf8ToInt)                # unicode codepoint
+  cps_hex = sprintf(&quot;%02x&quot;, cps)                 # convert to hexidecimal number
+  
+  # hexidecimal numbers are displayed in one of the following styles &quot;  ..ff&quot;, &quot;  a1ff&quot;, &quot;011f3e&quot;
+  # first two digits are rarely used so they are shown blank when they are 00
+  # The following two digits are 00 when the code is in ASCII so they are shown ..
+  cps_hex = 
+    ifelse(nchar(cps_hex) &gt; 2,
+           stringi::stri_pad(cps_hex, width = 4, side = &#39;left&#39;, pad = &#39;0&#39;),
+           stringi::stri_pad(cps_hex, width = 4, side = &#39;left&#39;, pad = &#39;.&#39;))
+  dat$codepoint = 
+    ifelse(nchar(cps_hex) &gt; 4,
+           stringi::stri_pad(cps_hex, width=6, side=&#39;left&#39;, pad=&#39;0&#39;),
+           stringi::stri_pad(cps_hex, width=6, side=&#39;left&#39;, pad=&#39; &#39;))
+  
+  # if given encodings=
+  if (!missing(encodings)) {
+    for (encoding in encodings) {
+      ch_enc = vector(mode=&#39;character&#39;, length=nrow(dat))
+      for (i in 1:nrow(dat)) {
+        ch = dat$ch[i]
+        ch_enc[i] = 
+          paste0(sprintf(&quot;%02x&quot;, 
+                         as.integer(unlist(
+                           iconv(ch, from = &#39;UTF-8&#39;, 
+                                     to=encoding, toRaw=TRUE)))),
+                 collapse = &#39; &#39;)
+      }
+      dat$enc = ch_enc
+      names(dat)[length(names(dat))] = paste0(&#39;enc.&#39;, encoding)  
+    }
+  }
+  dat$label = Unicode::u_char_label(cps); 
+  dat
+}</code></pre>
+<pre class="r"><code>u_chars(&quot;\ufeff\u0041\ub098\u2211\U00010384&quot;)</code></pre>
+<pre><code>##             ch codepoint                     label
+## 1     &lt;U+FEFF&gt;      feff ZERO WIDTH NO-BREAK SPACE
+## 2            A      ..41    LATIN CAPITAL LETTER A
+## 3           나      b098        HANGUL SYLLABLE NA
+## 4           ∑      2211           N-ARY SUMMATION
+## 5 &lt;U+00010384&gt;    010384     UGARITIC LETTER DELTA</code></pre>
+<p>You can see how the characters will be encoded in other encoding scheme using <code>encodings =</code>.</p>
+<pre class="r"><code>u_chars(&quot;\ufeff\u0041똠\u2211\U00010384&quot;, encodings = c(&quot;CP949&quot;, &quot;latin1&quot;))</code></pre>
+<pre><code>##             ch codepoint enc.CP949 enc.latin1                     label
+## 1     &lt;U+FEFF&gt;      feff                      ZERO WIDTH NO-BREAK SPACE
+## 2            A      ..41        41         41    LATIN CAPITAL LETTER A
+## 3           똠      b620     8c 63                 HANGUL SYLLABLE DDOM
+## 4           ∑      2211     a2 b2                      N-ARY SUMMATION
+## 5 &lt;U+00010384&gt;    010384                          UGARITIC LETTER DELTA</code></pre>
+</div>
+<div id="another-application" class="section level2">
+<h2>Another application</h2>
+<pre class="r"><code>library(stringi)
+x = &#39;\u0423\u043a\u0440\u0430\u0457\u043d\u0430&#39;
+Encoding(x)
+## [1] &quot;UTF-8&quot;
+#x = iconv(x, to=&#39;UTF-8&#39;) 
+cat(x); cat(&#39;\n&#39;)
+## Укра&lt;U+0457&gt;на
+y = stri_trans_nfd(x)
+cat(y); cat(&#39;\n&#39;)
+## Укра&lt;U+0456&gt;&lt;U+0308&gt;на
+u_chars(x)
+##         ch codepoint                     label
+## 1       У      0423 CYRILLIC CAPITAL LETTER U
+## 2       к      043a  CYRILLIC SMALL LETTER KA
+## 3       р      0440  CYRILLIC SMALL LETTER ER
+## 4       а      0430   CYRILLIC SMALL LETTER A
+## 5 &lt;U+0457&gt;      0457  CYRILLIC SMALL LETTER YI
+## 6       н      043d  CYRILLIC SMALL LETTER EN
+## 7       а      0430   CYRILLIC SMALL LETTER A
+u_chars(y)
+##         ch codepoint                                          label
+## 1       У      0423                      CYRILLIC CAPITAL LETTER U
+## 2       к      043a                       CYRILLIC SMALL LETTER KA
+## 3       р      0440                       CYRILLIC SMALL LETTER ER
+## 4       а      0430                        CYRILLIC SMALL LETTER A
+## 5 &lt;U+0456&gt;      0456 CYRILLIC SMALL LETTER BYELORUSSIAN-UKRAINIAN I
+## 6 &lt;U+0308&gt;      0308                            COMBINING DIAERESIS
+## 7       н      043d                       CYRILLIC SMALL LETTER EN
+## 8       а      0430                        CYRILLIC SMALL LETTER A</code></pre>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://w3techs.com/technologies/cross/character_encoding/ranking" class="uri">https://w3techs.com/technologies/cross/character_encoding/ranking</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p><a href="https://en.wikipedia.org/wiki/Mojibake" class="uri">https://en.wikipedia.org/wiki/Mojibake</a><a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p><a href="https://en.wikipedia.org/wiki/Unicode_Consortium" class="uri">https://en.wikipedia.org/wiki/Unicode_Consortium</a><a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn4"><p><a href="http://www.unicode.org/charts/" class="uri">http://www.unicode.org/charts/</a><a href="#fnref4" class="footnote-back">↩︎</a></p></li>
+<li id="fn5"><p>There are several reasons for this. Unicode can embrace new languages or new characters can be found for only embraced languages.<a href="#fnref5" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/maxR/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/maxR/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/maxR/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

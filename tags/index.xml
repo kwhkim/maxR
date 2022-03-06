@@ -5,6 +5,40 @@
     <link>https://kwhkim.github.io/maxR/tags/</link>
     <description>Recent content in Tags on R to the max</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language><atom:link href="https://kwhkim.github.io/maxR/tags/index.xml" rel="self" type="application/rss+xml" />
+    <language>en-us</language>
+    <lastBuildDate>Sun, 06 Mar 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://kwhkim.github.io/maxR/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>character</title>
+      <link>https://kwhkim.github.io/maxR/tags/character/</link>
+      <pubDate>Sun, 06 Mar 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://kwhkim.github.io/maxR/tags/character/</guid>
+      <description></description>
+      
+      
+    </item>
+    
+    <item>
+      <title>encoding</title>
+      <link>https://kwhkim.github.io/maxR/tags/encoding/</link>
+      <pubDate>Sun, 06 Mar 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://kwhkim.github.io/maxR/tags/encoding/</guid>
+      <description></description>
+      
+      
+    </item>
+    
+    <item>
+      <title>preprocessing</title>
+      <link>https://kwhkim.github.io/maxR/tags/preprocessing/</link>
+      <pubDate>Sun, 06 Mar 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://kwhkim.github.io/maxR/tags/preprocessing/</guid>
+      <description></description>
+      
+      
+    </item>
+    
   </channel>
 </rss>

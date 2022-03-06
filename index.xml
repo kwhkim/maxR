@@ -6,33 +6,226 @@
     <description>Recent content on R to the max</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 30 Dec 2016 21:49:57 -0700</lastBuildDate><atom:link href="https://kwhkim.github.io/maxR/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 06 Mar 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://kwhkim.github.io/maxR/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>A Plain Markdown Post</title>
-      <link>https://kwhkim.github.io/maxR/2016/12/30/a-plain-markdown-post/</link>
-      <pubDate>Fri, 30 Dec 2016 21:49:57 -0700</pubDate>
+      <title>character in UTF-8</title>
+      <link>https://kwhkim.github.io/maxR/2022/03/06/character-in-utf-8/</link>
+      <pubDate>Sun, 06 Mar 2022 00:00:00 +0000</pubDate>
       
-      <guid>https://kwhkim.github.io/maxR/2016/12/30/a-plain-markdown-post/</guid>
-      <description>This is a post written in plain Markdown (*.md) instead of R Markdown (*.Rmd). The major differences are:
- You cannot run any R code in a plain Markdown document, whereas in an R Markdown document, you can embed R code chunks (```{r}); A plain Markdown post is rendered through Blackfriday, and an R Markdown document is compiled by rmarkdown and Pandoc.  There are many differences in syntax between Blackfriday&amp;rsquo;s Markdown and Pandoc&amp;rsquo;s Markdown.</description>
+      <guid>https://kwhkim.github.io/maxR/2022/03/06/character-in-utf-8/</guid>
+      <description>
+&lt;script src=&#34;https://kwhkim.github.io/maxR/2022/03/06/character-in-utf-8/index_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
+
+
+&lt;div id=&#34;encoding&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Encoding&lt;/h2&gt;
+&lt;p&gt;Computer can store data only with 0s and 1s. Putting together a lot of 0s and 1s, a computer can present a bigger number. But if it want to store a letter, it needs a mapping of a number onto a letter. This mapping is called “&lt;strong&gt;encoding&lt;/strong&gt;”.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Encoding&lt;/strong&gt; depends on the letters to store. Letters people use are different for different countries and languages. There are over 1000 encodings worldwide. But over 90% of the encodings used in the internet is UTF-8&lt;a href=&#34;#fn1&#34; class=&#34;footnote-ref&#34; id=&#34;fnref1&#34;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;unicode&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Unicode&lt;/h2&gt;
+&lt;p&gt;We are in an internet era. It has become ordinary to send documents over the border of a country. But encodings usually were made for use in one country. So the documents from foreign country could be not read properly because the encoding was different&lt;a href=&#34;#fn2&#34; class=&#34;footnote-ref&#34; id=&#34;fnref2&#34;&gt;&lt;sup&gt;2&lt;/sup&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Unicode was developed for this kind of problem. Unicode tries to have a mapping for all the characters that exist today or existed from the beginning of the history. Unicode Consortium&lt;a href=&#34;#fn3&#34; class=&#34;footnote-ref&#34; id=&#34;fnref3&#34;&gt;&lt;sup&gt;3&lt;/sup&gt;&lt;/a&gt; is a non-profit oganization that develops Unicode. The number that a character maps to is called &lt;strong&gt;code point&lt;/strong&gt;. You can check the Code points from &lt;strong&gt;Unicode Code Chart&lt;/strong&gt;&lt;a href=&#34;#fn4&#34; class=&#34;footnote-ref&#34; id=&#34;fnref4&#34;&gt;&lt;sup&gt;4&lt;/sup&gt;&lt;/a&gt;. As the Unicode version increases, the number of character that Unicode can represent is also increasing&lt;a href=&#34;#fn5&#34; class=&#34;footnote-ref&#34; id=&#34;fnref5&#34;&gt;&lt;sup&gt;5&lt;/sup&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Version 1.0.0(1991) supported 7129 characters from 24 languages. Version 14(2021) includes 144,697 characters from 159 languages. Version 6.0(2010 decided to support emojis because celluar phone makers demanded and it could have evloved into different encodings for different phone makers because of emojis, which was the reason for Unicode. Unicode tried to incorporate all the characters worldwide so any encodings can be converted to Unicode. Unicode can be materialized into specific encoding scheme such as UTF-8, UTF-16, UTF-32. Those encoding scheme add additional layer for compression.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;character-in-r&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;&lt;code&gt;character&lt;/code&gt; in R&lt;/h2&gt;
+&lt;p&gt;R supports UTF-8. If a &lt;code&gt;character&lt;/code&gt; is not in UTF-8, it can be converted to UTF-8 using the following code.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;x = &amp;#39;한글&amp;#39; # Hangul in Korean
+y = iconv(x, to=&amp;#39;UTF-8&amp;#39;)
+x
+## [1] &amp;quot;한글&amp;quot;
+y
+## [1] &amp;quot;한글&amp;quot;
+Encoding(x)
+## [1] &amp;quot;unknown&amp;quot;
+Encoding(y)
+## [1] &amp;quot;UTF-8&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;UTF-8 is powerful. It can represent almost any characters. But the font is limited. Most fonts can not display all the characters. So there are cases that characters stored in a vector can not be properly displayed because the font in use does not support.&lt;/p&gt;
+&lt;p&gt;I propose the following function &lt;code&gt;u_chars&lt;/code&gt; for inspection of UTF-8 characters.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;u_chars&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;&lt;code&gt;u_chars&lt;/code&gt;&lt;/h2&gt;
+&lt;p&gt;The following function &lt;code&gt;u_chars()&lt;/code&gt; utilize the package &lt;code&gt;Unicode&lt;/code&gt; and prints out the information of each character for a string. Unicode characters have labels so characters that can be not displayed properly can be identified.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;u_chars = function(s, encodings) {
+  stopifnot(class(s) == &amp;quot;character&amp;quot;)
+  stopifnot(length(s)==1)
+  if (Encoding(s) == &amp;quot;unknown&amp;quot;) {
+    s = iconv(s, to = &amp;#39;UTF-8&amp;#39;)
+  } else if (Encoding(s) != &amp;#39;UTF-8&amp;#39;) {
+    s = iconv(s, from = Encoding(s), to=&amp;#39;UTF-8&amp;#39;)  } 
+  
+  dat = data.frame(ch = unlist(strsplit(s, &amp;quot;&amp;quot;))) # split characters
+  cps = sapply(dat$ch, utf8ToInt)                # unicode codepoint
+  cps_hex = sprintf(&amp;quot;%02x&amp;quot;, cps)                 # convert to hexidecimal number
+  
+  # hexidecimal numbers are displayed in one of the following styles &amp;quot;  ..ff&amp;quot;, &amp;quot;  a1ff&amp;quot;, &amp;quot;011f3e&amp;quot;
+  # first two digits are rarely used so they are shown blank when they are 00
+  # The following two digits are 00 when the code is in ASCII so they are shown ..
+  cps_hex = 
+    ifelse(nchar(cps_hex) &amp;gt; 2,
+           stringi::stri_pad(cps_hex, width = 4, side = &amp;#39;left&amp;#39;, pad = &amp;#39;0&amp;#39;),
+           stringi::stri_pad(cps_hex, width = 4, side = &amp;#39;left&amp;#39;, pad = &amp;#39;.&amp;#39;))
+  dat$codepoint = 
+    ifelse(nchar(cps_hex) &amp;gt; 4,
+           stringi::stri_pad(cps_hex, width=6, side=&amp;#39;left&amp;#39;, pad=&amp;#39;0&amp;#39;),
+           stringi::stri_pad(cps_hex, width=6, side=&amp;#39;left&amp;#39;, pad=&amp;#39; &amp;#39;))
+  
+  # if given encodings=
+  if (!missing(encodings)) {
+    for (encoding in encodings) {
+      ch_enc = vector(mode=&amp;#39;character&amp;#39;, length=nrow(dat))
+      for (i in 1:nrow(dat)) {
+        ch = dat$ch[i]
+        ch_enc[i] = 
+          paste0(sprintf(&amp;quot;%02x&amp;quot;, 
+                         as.integer(unlist(
+                           iconv(ch, from = &amp;#39;UTF-8&amp;#39;, 
+                                     to=encoding, toRaw=TRUE)))),
+                 collapse = &amp;#39; &amp;#39;)
+      }
+      dat$enc = ch_enc
+      names(dat)[length(names(dat))] = paste0(&amp;#39;enc.&amp;#39;, encoding)  
+    }
+  }
+  dat$label = Unicode::u_char_label(cps); 
+  dat
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;u_chars(&amp;quot;\ufeff\u0041\ub098\u2211\U00010384&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##             ch codepoint                     label
+## 1     &amp;lt;U+FEFF&amp;gt;      feff ZERO WIDTH NO-BREAK SPACE
+## 2            A      ..41    LATIN CAPITAL LETTER A
+## 3           나      b098        HANGUL SYLLABLE NA
+## 4           ∑      2211           N-ARY SUMMATION
+## 5 &amp;lt;U+00010384&amp;gt;    010384     UGARITIC LETTER DELTA&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You can see how the characters will be encoded in other encoding scheme using &lt;code&gt;encodings =&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;u_chars(&amp;quot;\ufeff\u0041똠\u2211\U00010384&amp;quot;, encodings = c(&amp;quot;CP949&amp;quot;, &amp;quot;latin1&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##             ch codepoint enc.CP949 enc.latin1                     label
+## 1     &amp;lt;U+FEFF&amp;gt;      feff                      ZERO WIDTH NO-BREAK SPACE
+## 2            A      ..41        41         41    LATIN CAPITAL LETTER A
+## 3           똠      b620     8c 63                 HANGUL SYLLABLE DDOM
+## 4           ∑      2211     a2 b2                      N-ARY SUMMATION
+## 5 &amp;lt;U+00010384&amp;gt;    010384                          UGARITIC LETTER DELTA&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;another-application&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Another application&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(stringi)
+x = &amp;#39;\u0423\u043a\u0440\u0430\u0457\u043d\u0430&amp;#39;
+Encoding(x)
+## [1] &amp;quot;UTF-8&amp;quot;
+#x = iconv(x, to=&amp;#39;UTF-8&amp;#39;) 
+cat(x); cat(&amp;#39;\n&amp;#39;)
+## Укра&amp;lt;U+0457&amp;gt;на
+y = stri_trans_nfd(x)
+cat(y); cat(&amp;#39;\n&amp;#39;)
+## Укра&amp;lt;U+0456&amp;gt;&amp;lt;U+0308&amp;gt;на
+u_chars(x)
+##         ch codepoint                     label
+## 1       У      0423 CYRILLIC CAPITAL LETTER U
+## 2       к      043a  CYRILLIC SMALL LETTER KA
+## 3       р      0440  CYRILLIC SMALL LETTER ER
+## 4       а      0430   CYRILLIC SMALL LETTER A
+## 5 &amp;lt;U+0457&amp;gt;      0457  CYRILLIC SMALL LETTER YI
+## 6       н      043d  CYRILLIC SMALL LETTER EN
+## 7       а      0430   CYRILLIC SMALL LETTER A
+u_chars(y)
+##         ch codepoint                                          label
+## 1       У      0423                      CYRILLIC CAPITAL LETTER U
+## 2       к      043a                       CYRILLIC SMALL LETTER KA
+## 3       р      0440                       CYRILLIC SMALL LETTER ER
+## 4       а      0430                        CYRILLIC SMALL LETTER A
+## 5 &amp;lt;U+0456&amp;gt;      0456 CYRILLIC SMALL LETTER BYELORUSSIAN-UKRAINIAN I
+## 6 &amp;lt;U+0308&amp;gt;      0308                            COMBINING DIAERESIS
+## 7       н      043d                       CYRILLIC SMALL LETTER EN
+## 8       а      0430                        CYRILLIC SMALL LETTER A&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+&lt;hr /&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn1&#34;&gt;&lt;p&gt;&lt;a href=&#34;https://w3techs.com/technologies/cross/character_encoding/ranking&#34; class=&#34;uri&#34;&gt;https://w3techs.com/technologies/cross/character_encoding/ranking&lt;/a&gt;&lt;a href=&#34;#fnref1&#34; class=&#34;footnote-back&#34;&gt;↩︎&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn2&#34;&gt;&lt;p&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Mojibake&#34; class=&#34;uri&#34;&gt;https://en.wikipedia.org/wiki/Mojibake&lt;/a&gt;&lt;a href=&#34;#fnref2&#34; class=&#34;footnote-back&#34;&gt;↩︎&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn3&#34;&gt;&lt;p&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Unicode_Consortium&#34; class=&#34;uri&#34;&gt;https://en.wikipedia.org/wiki/Unicode_Consortium&lt;/a&gt;&lt;a href=&#34;#fnref3&#34; class=&#34;footnote-back&#34;&gt;↩︎&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn4&#34;&gt;&lt;p&gt;&lt;a href=&#34;http://www.unicode.org/charts/&#34; class=&#34;uri&#34;&gt;http://www.unicode.org/charts/&lt;/a&gt;&lt;a href=&#34;#fnref4&#34; class=&#34;footnote-back&#34;&gt;↩︎&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn5&#34;&gt;&lt;p&gt;There are several reasons for this. Unicode can embrace new languages or new characters can be found for only embraced languages.&lt;a href=&#34;#fnref5&#34; class=&#34;footnote-back&#34;&gt;↩︎&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
+      
+            <tag>character</tag>
+      
+            <tag>preprocessing</tag>
+      
+            <tag>encoding</tag>
+      
+      
+            <category>R</category>
+      
     </item>
     
     <item>
       <title>About</title>
       <link>https://kwhkim.github.io/maxR/about/</link>
-      <pubDate>Thu, 05 May 2016 21:48:51 -0700</pubDate>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://kwhkim.github.io/maxR/about/</guid>
-      <description>This is a &amp;ldquo;hello world&amp;rdquo; example website for the blogdown package. The theme was forked from @jrutheiser/hugo-lithium-theme and modified by Yihui Xie.</description>
-    </item>
-    
-    <item>
-      <title>Lorem Ipsum</title>
-      <link>https://kwhkim.github.io/maxR/2015/01/01/lorem-ipsum/</link>
-      <pubDate>Thu, 01 Jan 2015 13:09:13 -0600</pubDate>
+      <description>&lt;h2 id=&#34;greetings&#34;&gt;Greetings!&lt;/h2&gt;
+&lt;p&gt;Welcome to &amp;ldquo;R to the max!&amp;rdquo; This website is on R for Data Analysis. The posts are mostly translated from &lt;a href=&#34;http://ds.sumeun.org/&#34;&gt;Sumeun Data Science&lt;/a&gt;. Here is some info about the maintainer of the site. Check out the links.&lt;/p&gt;
+&lt;h3 id=&#34;education&#34;&gt;Education&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Seoul National University. B.S. in Physics.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Seoul National University. Ph.D. in Cognitive Science.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;books&#34;&gt;Books&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Kim, K. H. (2022). &lt;a href=&#34;http://www.kyobobook.co.kr/product/detailViewKor.laf?ejkGb=KOR&amp;amp;mallGb=KOR&amp;amp;barcode=9791196014445&amp;amp;orderClick=LEa&amp;amp;Kc=&#34;&gt;R로 하는 빅데이터 분석: 데이터 전처리와 시각화.&lt;/a&gt; Big Data Analysis with R: Data preprocessing and visualization, 3rd. Sumeun. Seoul.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Kim, K. H. (2019). &lt;a href=&#34;http://www.kyobobook.co.kr/product/detailViewKor.laf?ejkGb=KOR&amp;amp;mallGb=KOR&amp;amp;barcode=9791196014407&amp;amp;orderClick=LAG&amp;amp;Kc=&#34;&gt;고등학교 인수분해 완전 정복.&lt;/a&gt; Conquering high school factoring. Sumeun. Seoul.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Kim, K. H., Kwak. M. Y., Lee, C. S. (2017). &lt;a href=&#34;http://www.yes24.com/Product/Goods/43244145&#34;&gt;수학의 숨은 원리.&lt;/a&gt; Hidden priciples of Mathematics. Sumeun. Seoul.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Kim, K. H. (2013). &lt;a href=&#34;http://www.kyobobook.co.kr/product/detailViewKor.laf?ejkGb=KOR&amp;amp;mallGb=KOR&amp;amp;barcode=9788961057103&amp;amp;orderClick=LAG&amp;amp;Kc=&#34;&gt;기초 통계학의 숨은 원리 이해하기.&lt;/a&gt; Understanding the hidden principles of basic statistics. Kyungmoon. Seoul.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;papers&#34;&gt;Papers&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Hyosoo Moon, Kwonhyun Kim, Hyun-Soo Lee, Moonseo Park, Trefor P. Williams, Bosik
+Son, and Jae-Youl Chun(2020). Cost Performance Comparison of Design-Build and
+Design-Bid-Build for Building and Civil Projects Using Mediation Analysis. Journal of Construction Engineering and Management.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Kim, Y. H., Jeon, J. H., Choe, E. K., Lee, B., Kim, K., Seo, J. (2016). TimeAware:
+Leveraging framing effects to enhance personal productivity. In Proceedings of the
+SIGCHI conference on human factors in computing systems.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;awards&#34;&gt;Awards&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.asce.org/career-growth/awards-and-honors/thomas-fitch-rowland-prize&#34;&gt;ASCE(&lt;strong&gt;A&lt;/strong&gt;merican &lt;strong&gt;S&lt;/strong&gt;ociety of &lt;strong&gt;C&lt;/strong&gt;ivil &lt;strong&gt;E&lt;/strong&gt;ngineers) Thomas Fitch Rowland Prize.&lt;/a&gt; &lt;a href=&#34;https://www.mk.co.kr/news/society/view/2022/02/170329/&#34;&gt;(2022).&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!---
+your comment goes here
+and here
+
+## Links
+Github](https://github.com/kwhkim)
+Twitter](https://twitter.com/kwnhkim)
+--&gt;
+&lt;h3 id=&#34;related-links&#34;&gt;Related Links&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.r-bloggers.com/&#34;&gt;R-bloggers&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
       
-      <guid>https://kwhkim.github.io/maxR/2015/01/01/lorem-ipsum/</guid>
-      <description>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</description>
+      
     </item>
     
   </channel>
