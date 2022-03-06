@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>big data on R to the max</title>
+    <link>https://kwhkim.github.io/maxR/tags/big-data/</link>
+    <description>Recent content in big data on R to the max</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 06 Mar 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://kwhkim.github.io/maxR/tags/big-data/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Better Visualization of y|x for Big Data</title>
+      <link>https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/</link>
+      <pubDate>Sun, 06 Mar 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/</guid>
+      <description>
+&lt;script src=&#34;https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
+
+
+&lt;div id=&#34;plotting-big-data-and-alpha&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Plotting Big Data and Alpha&lt;/h2&gt;
+&lt;p&gt;When plotting too many data points, we use &lt;code&gt;alpha=&lt;/code&gt; because points are overlapped and indistinguishable.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(dplyr)
+library(data.table)
+library(cowplot)
+library(ggplot2)
+
+#N &amp;lt;- 1000
+N &amp;lt;- 1000000
+
+x &amp;lt;- rnorm(N)
+y &amp;lt;- x + rnorm(N)
+
+
+dat &amp;lt;- data.table(x = x, 
+                  y = y)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dat %&amp;gt;% ggplot(aes(x=x, y=y)) + 
+  geom_point() + 
+  labs(title=&amp;#39;Original plot&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;70%&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dat %&amp;gt;% ggplot(aes(x=x, y=y)) + geom_point(alpha=0.01) + 
+  labs(title=&amp;#39;Using alpha=0.01&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;70%&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Meaningful minimal &lt;code&gt;alpha&lt;/code&gt; seems to be &lt;code&gt;0.01&lt;/code&gt; for &lt;code&gt;ggplot2&lt;/code&gt;. For very big data, &lt;code&gt;alpha=0.01&lt;/code&gt; is not small enough. Looking at the plot the above, we see big blackness in the center. This might be that the densities in the center are the same or it might be that they reached to the ceiling of blackness even if the densities are not equal.&lt;/p&gt;
+&lt;p&gt;Bivariate normal distribution is too simple. Let’s try more complex data.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;x1 &amp;lt;- rnorm(N/2)
+y1 &amp;lt;- 2*sin(x1) + rnorm(N/2)
+x2 &amp;lt;- rnorm(N/2)
+y2 &amp;lt;- 2*cos(x2) + rt(N/2, df=30)
+
+dat &amp;lt;- data.table(x=c(x1,x2),
+                  y=c(y1,y2))&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;using-multiple-alphas&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Using multiple &lt;code&gt;alpha&lt;/code&gt;s&lt;/h3&gt;
+&lt;p&gt;We can use multiple &lt;code&gt;alpha&lt;/code&gt;s to avoid the problem of ceiling effect of constant &lt;code&gt;alpha&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- dat %&amp;gt;% ggplot(aes(x=x, y=y)) + geom_point() + 
+  labs(title=&amp;#39;alpha=1&amp;#39;) + theme_minimal()
+p2 &amp;lt;- dat %&amp;gt;% ggplot(aes(x=x, y=y)) + geom_point(alpha=0.1) + 
+  labs(title=&amp;#39;alpha=0.1&amp;#39;) + theme_minimal()
+p3 &amp;lt;- dat %&amp;gt;% ggplot(aes(x=x, y=y)) + geom_point(alpha=0.05) +
+  labs(title=&amp;#39;alpha=0.05&amp;#39;) + theme_minimal()
+p4 &amp;lt;- dat %&amp;gt;% ggplot(aes(x=x, y=y)) + geom_point(alpha=0.01) +
+  labs(title=&amp;#39;alpha=0.01&amp;#39;) + theme_minimal()
+
+plot_grid(p1,p2,p3,p4,ncol=2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;70%&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;But using the minimal &lt;code&gt;alpha=0.01&lt;/code&gt; does not reveal the density differences in the center. We can try sampling in this case.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;sampling&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Sampling&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- dat %&amp;gt;% sample_n(N/5) %&amp;gt;% 
+  ggplot(aes(x=x, y=y)) + geom_point(alpha=0.01) + 
+  labs(title=&amp;#39;alpha=0.01 with 20% of data&amp;#39;) + theme_minimal()
+p2 &amp;lt;- dat %&amp;gt;% sample_n(N/10) %&amp;gt;% 
+  ggplot(aes(x=x, y=y)) + geom_point(alpha=0.01) + 
+  labs(title=&amp;#39;alpha=0.01 with 10% of data&amp;#39;) + theme_minimal()
+p3 &amp;lt;- dat %&amp;gt;% sample_n(N/50) %&amp;gt;% 
+  ggplot(aes(x=x, y=y)) + geom_point(alpha=0.01) +
+  labs(title=&amp;#39;alpha=0.01 with 2% of data&amp;#39;) + theme_minimal()
+p4 &amp;lt;- dat %&amp;gt;% sample_n(N/100) %&amp;gt;% 
+  ggplot(aes(x=x, y=y)) + geom_point(alpha=0.01) +
+  labs(title=&amp;#39;alpha=0.01 with 1% of data&amp;#39;) + theme_minimal()
+library(cowplot)
+plot_grid(p1,p2,p3,p4,ncol=2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;70%&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;But sampling utilizes only some part of the data. It depends on the chance so the results are different every time we plot.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;contidional-density-plot&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Contidional density plot&lt;/h2&gt;
+&lt;p&gt;There are several reason for plotting. One reason is doing EDA(&lt;strong&gt;E&lt;/strong&gt;xploratory &lt;strong&gt;D&lt;/strong&gt;ata &lt;strong&gt;A&lt;/strong&gt;nalysis) before doing regression analysis such as linear model, ML, and DL.&lt;/p&gt;
+&lt;p&gt;The important thing in this case is to see what conditional density &lt;span class=&#34;math inline&#34;&gt;\(\mathbb{p}(y|x)\)&lt;/span&gt; is like. Besides all plots above are focused on bivariate density.&lt;/p&gt;
+&lt;p&gt;To visualize the expectation of &lt;span class=&#34;math inline&#34;&gt;\(y\)&lt;/span&gt; conditional on &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; , non-parametric regression line in the following would help.&lt;/p&gt;
+&lt;div id=&#34;regression-line&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Regression line&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1 &amp;lt;- dat %&amp;gt;% sample_n(N/100) %&amp;gt;% 
+  ggplot(aes(x=x, y=y)) + geom_point(alpha=0.01) +
+  geom_smooth(method=&amp;#39;loess&amp;#39;) + 
+  labs(title=&amp;#39;alpha=0.01 with 1% of data, loess&amp;#39;) + theme_minimal() 
+p2 &amp;lt;- dat %&amp;gt;% sample_n(N/100) %&amp;gt;% 
+  ggplot(aes(x=x, y=y)) + geom_point(alpha=0.01) +
+  geom_smooth(method=&amp;#39;auto&amp;#39;) + 
+  labs(title=&amp;#39;alpha=0.01 with 1% of data, gam&amp;#39;) + theme_minimal() 
+print(p1)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## `geom_smooth()` using formula &amp;#39;y ~ x&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;print(p2)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## `geom_smooth()` using method = &amp;#39;gam&amp;#39; and formula &amp;#39;y ~ s(x, bs = &amp;quot;cs&amp;quot;)&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;70%&#34; /&gt;&lt;img src=&#34;https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-7-2.png&#34; width=&#34;70%&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We can definitely see conditional expectation( &lt;span class=&#34;math inline&#34;&gt;\(\mathbb{E}[y|x] = \int y\  \mathbb{p}(y|x) dy\)&lt;/span&gt; ), but we cannot figure out what the conditional density would be like.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;conditional-density&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Conditional density&lt;/h3&gt;
+&lt;div id=&#34;binning-x&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;binning &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;As we saw above, using small constant &lt;code&gt;alpha&lt;/code&gt; prevents us from identifying the density difference when the points are too gathered and identifying data points where data points are so scarce. One possible solution would be binning &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; and sampling.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dat %&amp;gt;% 
+  mutate(xCut = cut(x, breaks=10)) %&amp;gt;%
+  group_by(xCut) %&amp;gt;%
+  do(sample_n(., 10000, replace=TRUE)) %&amp;gt;%
+  ggplot(aes(x=x, y=y)) + 
+  geom_point(alpha=0.01)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;70%&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Better visualizing of conditional density but we can see artifacts. It must be because of too big bin size. Let’s try smaller bin size.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dat %&amp;gt;% 
+  mutate(xCut = cut(x, breaks=50)) %&amp;gt;%
+  group_by(xCut) %&amp;gt;%
+  do(sample_n(., 2000, replace=TRUE)) %&amp;gt;%
+  ggplot(aes(x=x, y=y)) + 
+  geom_point(alpha=0.01)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;70%&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;estimating-density-of-x&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Estimating density of &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt;&lt;/h4&gt;
+&lt;p&gt;We can never say what is the best bin size. We would better estimate the probability density function of &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;We also treated every &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; as identical. We might take estimated probability function of &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; into consideration, either using probability function itself or some function(ex. &lt;span class=&#34;math inline&#34;&gt;\(\log\)&lt;/span&gt; ) of it.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;xDensity &amp;lt;- ks::kde(dat$x)
+dat$prob &amp;lt;- predict(xDensity, x = dat$x)
+
+#head(dat)
+dat %&amp;gt;% 
+  mutate(xCut = cut(x, breaks=50)) %&amp;gt;%
+  group_by(xCut) %&amp;gt;%
+  do(sample_n(., 2000, replace=TRUE, weight=1/prob)) %&amp;gt;%
+  
+  ggplot(aes(x=x, y=y)) + 
+  geom_point(alpha=0.01) &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;70%&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+      
+            <tag>big data</tag>
+      
+            <tag>visualization</tag>
+      
+      
+            <category>R</category>
+      
+    </item>
+    
+  </channel>
+</rss>

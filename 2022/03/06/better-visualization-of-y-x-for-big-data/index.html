@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.93.1" />
+
+
+<title>Better Visualization of y|x for Big Data - R to the max</title>
+<meta property="og:title" content="Better Visualization of y|x for Big Data - R to the max">
+
+
+  <link href='https://kwhkim.github.io/maxR/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/maxR/css/fonts.css" media="all">
+<link rel="stylesheet" href="/maxR/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/maxR/" class="nav-logo">
+    <img src="/maxR/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/maxR/about/">About</a></li>
+    
+    <li><a href="/maxR/categories/">Categories</a></li>
+    
+    <li><a href="/maxR/tags/">Tags</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">4 min read</span>
+    
+
+    <h1 class="article-title">Better Visualization of y|x for Big Data</h1>
+
+    
+    <span class="article-date">2022-03-06</span>
+    
+
+    <div class="article-content">
+      
+<script src="https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/header-attrs/header-attrs.js"></script>
+
+
+<div id="plotting-big-data-and-alpha" class="section level2">
+<h2>Plotting Big Data and Alpha</h2>
+<p>When plotting too many data points, we use <code>alpha=</code> because points are overlapped and indistinguishable.</p>
+<pre class="r"><code>library(dplyr)
+library(data.table)
+library(cowplot)
+library(ggplot2)
+
+#N &lt;- 1000
+N &lt;- 1000000
+
+x &lt;- rnorm(N)
+y &lt;- x + rnorm(N)
+
+
+dat &lt;- data.table(x = x, 
+                  y = y)</code></pre>
+<pre class="r"><code>dat %&gt;% ggplot(aes(x=x, y=y)) + 
+  geom_point() + 
+  labs(title=&#39;Original plot&#39;)</code></pre>
+<p><img src="https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-2-1.png" width="70%" /></p>
+<pre class="r"><code>dat %&gt;% ggplot(aes(x=x, y=y)) + geom_point(alpha=0.01) + 
+  labs(title=&#39;Using alpha=0.01&#39;)</code></pre>
+<p><img src="https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-3-1.png" width="70%" /></p>
+<p>Meaningful minimal <code>alpha</code> seems to be <code>0.01</code> for <code>ggplot2</code>. For very big data, <code>alpha=0.01</code> is not small enough. Looking at the plot the above, we see big blackness in the center. This might be that the densities in the center are the same or it might be that they reached to the ceiling of blackness even if the densities are not equal.</p>
+<p>Bivariate normal distribution is too simple. Let’s try more complex data.</p>
+<pre class="r"><code>x1 &lt;- rnorm(N/2)
+y1 &lt;- 2*sin(x1) + rnorm(N/2)
+x2 &lt;- rnorm(N/2)
+y2 &lt;- 2*cos(x2) + rt(N/2, df=30)
+
+dat &lt;- data.table(x=c(x1,x2),
+                  y=c(y1,y2))</code></pre>
+<div id="using-multiple-alphas" class="section level3">
+<h3>Using multiple <code>alpha</code>s</h3>
+<p>We can use multiple <code>alpha</code>s to avoid the problem of ceiling effect of constant <code>alpha</code>.</p>
+<pre class="r"><code>p1 &lt;- dat %&gt;% ggplot(aes(x=x, y=y)) + geom_point() + 
+  labs(title=&#39;alpha=1&#39;) + theme_minimal()
+p2 &lt;- dat %&gt;% ggplot(aes(x=x, y=y)) + geom_point(alpha=0.1) + 
+  labs(title=&#39;alpha=0.1&#39;) + theme_minimal()
+p3 &lt;- dat %&gt;% ggplot(aes(x=x, y=y)) + geom_point(alpha=0.05) +
+  labs(title=&#39;alpha=0.05&#39;) + theme_minimal()
+p4 &lt;- dat %&gt;% ggplot(aes(x=x, y=y)) + geom_point(alpha=0.01) +
+  labs(title=&#39;alpha=0.01&#39;) + theme_minimal()
+
+plot_grid(p1,p2,p3,p4,ncol=2)</code></pre>
+<p><img src="https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-5-1.png" width="70%" /></p>
+<p>But using the minimal <code>alpha=0.01</code> does not reveal the density differences in the center. We can try sampling in this case.</p>
+</div>
+<div id="sampling" class="section level3">
+<h3>Sampling</h3>
+<pre class="r"><code>p1 &lt;- dat %&gt;% sample_n(N/5) %&gt;% 
+  ggplot(aes(x=x, y=y)) + geom_point(alpha=0.01) + 
+  labs(title=&#39;alpha=0.01 with 20% of data&#39;) + theme_minimal()
+p2 &lt;- dat %&gt;% sample_n(N/10) %&gt;% 
+  ggplot(aes(x=x, y=y)) + geom_point(alpha=0.01) + 
+  labs(title=&#39;alpha=0.01 with 10% of data&#39;) + theme_minimal()
+p3 &lt;- dat %&gt;% sample_n(N/50) %&gt;% 
+  ggplot(aes(x=x, y=y)) + geom_point(alpha=0.01) +
+  labs(title=&#39;alpha=0.01 with 2% of data&#39;) + theme_minimal()
+p4 &lt;- dat %&gt;% sample_n(N/100) %&gt;% 
+  ggplot(aes(x=x, y=y)) + geom_point(alpha=0.01) +
+  labs(title=&#39;alpha=0.01 with 1% of data&#39;) + theme_minimal()
+library(cowplot)
+plot_grid(p1,p2,p3,p4,ncol=2)</code></pre>
+<p><img src="https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-6-1.png" width="70%" /></p>
+<p>But sampling utilizes only some part of the data. It depends on the chance so the results are different every time we plot.</p>
+</div>
+</div>
+<div id="contidional-density-plot" class="section level2">
+<h2>Contidional density plot</h2>
+<p>There are several reason for plotting. One reason is doing EDA(<strong>E</strong>xploratory <strong>D</strong>ata <strong>A</strong>nalysis) before doing regression analysis such as linear model, ML, and DL.</p>
+<p>The important thing in this case is to see what conditional density <span class="math inline">\(\mathbb{p}(y|x)\)</span> is like. Besides all plots above are focused on bivariate density.</p>
+<p>To visualize the expectation of <span class="math inline">\(y\)</span> conditional on <span class="math inline">\(x\)</span> , non-parametric regression line in the following would help.</p>
+<div id="regression-line" class="section level3">
+<h3>Regression line</h3>
+<pre class="r"><code>p1 &lt;- dat %&gt;% sample_n(N/100) %&gt;% 
+  ggplot(aes(x=x, y=y)) + geom_point(alpha=0.01) +
+  geom_smooth(method=&#39;loess&#39;) + 
+  labs(title=&#39;alpha=0.01 with 1% of data, loess&#39;) + theme_minimal() 
+p2 &lt;- dat %&gt;% sample_n(N/100) %&gt;% 
+  ggplot(aes(x=x, y=y)) + geom_point(alpha=0.01) +
+  geom_smooth(method=&#39;auto&#39;) + 
+  labs(title=&#39;alpha=0.01 with 1% of data, gam&#39;) + theme_minimal() 
+print(p1)</code></pre>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+<pre class="r"><code>print(p2)</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;gam&#39; and formula &#39;y ~ s(x, bs = &quot;cs&quot;)&#39;</code></pre>
+<p><img src="https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-7-1.png" width="70%" /><img src="https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-7-2.png" width="70%" /></p>
+<p>We can definitely see conditional expectation( <span class="math inline">\(\mathbb{E}[y|x] = \int y\  \mathbb{p}(y|x) dy\)</span> ), but we cannot figure out what the conditional density would be like.</p>
+</div>
+<div id="conditional-density" class="section level3">
+<h3>Conditional density</h3>
+<div id="binning-x" class="section level4">
+<h4>binning <span class="math inline">\(x\)</span></h4>
+<p>As we saw above, using small constant <code>alpha</code> prevents us from identifying the density difference when the points are too gathered and identifying data points where data points are so scarce. One possible solution would be binning <span class="math inline">\(x\)</span> and sampling.</p>
+<pre class="r"><code>dat %&gt;% 
+  mutate(xCut = cut(x, breaks=10)) %&gt;%
+  group_by(xCut) %&gt;%
+  do(sample_n(., 10000, replace=TRUE)) %&gt;%
+  ggplot(aes(x=x, y=y)) + 
+  geom_point(alpha=0.01)</code></pre>
+<p><img src="https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-8-1.png" width="70%" /></p>
+<p>Better visualizing of conditional density but we can see artifacts. It must be because of too big bin size. Let’s try smaller bin size.</p>
+<pre class="r"><code>dat %&gt;% 
+  mutate(xCut = cut(x, breaks=50)) %&gt;%
+  group_by(xCut) %&gt;%
+  do(sample_n(., 2000, replace=TRUE)) %&gt;%
+  ggplot(aes(x=x, y=y)) + 
+  geom_point(alpha=0.01)</code></pre>
+<p><img src="https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-9-1.png" width="70%" /></p>
+</div>
+<div id="estimating-density-of-x" class="section level4">
+<h4>Estimating density of <span class="math inline">\(x\)</span></h4>
+<p>We can never say what is the best bin size. We would better estimate the probability density function of <span class="math inline">\(x\)</span>.</p>
+<p>We also treated every <span class="math inline">\(x\)</span> as identical. We might take estimated probability function of <span class="math inline">\(x\)</span> into consideration, either using probability function itself or some function(ex. <span class="math inline">\(\log\)</span> ) of it.</p>
+<pre class="r"><code>xDensity &lt;- ks::kde(dat$x)
+dat$prob &lt;- predict(xDensity, x = dat$x)
+
+#head(dat)
+dat %&gt;% 
+  mutate(xCut = cut(x, breaks=50)) %&gt;%
+  group_by(xCut) %&gt;%
+  do(sample_n(., 2000, replace=TRUE, weight=1/prob)) %&gt;%
+  
+  ggplot(aes(x=x, y=y)) + 
+  geom_point(alpha=0.01) </code></pre>
+<p><img src="https://kwhkim.github.io/maxR/2022/03/06/better-visualization-of-y-x-for-big-data/index_files/figure-html/unnamed-chunk-10-1.png" width="70%" /></p>
+</div>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/maxR/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/maxR/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/maxR/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+
