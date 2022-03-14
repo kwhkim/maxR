@@ -1,0 +1,81 @@
+---
+title: measurement units
+author: KwH Kim
+date: '2022-03-15'
+slug: measurement-units
+categories: ["R"]
+tags: ["visualization", "preprocessing"]
+output: html_document
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>Data <code>mtcars</code> has a column named <code>mpg</code>. <code>mpg</code> means <strong>m</strong>iles <strong>p</strong>er <strong>g</strong>allon. ‘Mile’ and ‘gallon’ are units for length and volume. A mile is approximately 1.6 kilometers and a gallon is approximately 3.7 liters. Mile and gallon sound unfamiliar to people who live outside England or U.S.A. because international standard units for length and volume are meter and liter.</p>
+<p>In this post, we will learn how to convert a unit to another unit, for instance, we will convert mpg to km/L, which is more comprehensible to people who use SI units.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
+<div id="units-in-r" class="section level2">
+<h2>Units in R</h2>
+<p>Vectors(the most common data structure in R) do not contain information of measurement units. Units are implicit and units should be converted by users. But as history tells us, unit conversion should be treated carefully because it can cause serious damage to the whole project<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>.</p>
+</div>
+<div id="package-units" class="section level2">
+<h2>Package <code>units</code></h2>
+<p>Using the package <code>units</code>, we can easily convert units accurately. And the data is plotted, units will be included in the x- or y-label automatically.</p>
+<p>First install package <code>units</code>.</p>
+<pre class="r"><code>install.packages(&#39;units&#39;)</code></pre>
+<p>And load all the necessary packages and data</p>
+<pre class="r"><code>library(units)</code></pre>
+<pre><code>## udunits database from C:/Users/Seul/Documents/R/win-library/4.1/units/share/udunits/udunits2.xml</code></pre>
+<pre class="r"><code>library(dplyr, warn.conflicts = FALSE)
+data(mtcars)</code></pre>
+<p>To get the information about the data <code>mtcars</code>, we can do <code>help(mtcars)</code>. It will show the measurement unit for each column. <code>mpg</code> is measured in unit of <strong>m</strong>iles <strong>p</strong>er <strong>g</strong>allon, <code>disp</code> is measured in unit of cubic inch, <code>hp</code> is measured in unit of gross <strong>h</strong>orse<strong>p</strong>ower, <code>wt</code> is measured in unit of 1000 lbs, and <code>qsec</code> is measured in unit of sec per 1/4 mile.</p>
+<p>It is sad that mpg(<strong>m</strong>iles <strong>p</strong>er <strong>g</strong>allon) is not registered in the package <code>units</code>, but we can register it ourselves. The code below installs a new unit called <code>mpg_US</code> as <code>interantional_mile/US_liquid_gallon</code>.</p>
+<pre class="r"><code>install_unit(name=&#39;mpg_US&#39;, def=&#39;international_mile/US_liquid_gallon&#39;)</code></pre>
+<p>Now we can use <code>mpg_US</code>. <code>mtcars$mpg</code> is measured in unit of mpg(US) and <code>mtcars$wt</code> is measured in unit of kilogram.</p>
+<pre class="r"><code>units(mtcars$mpg) = &#39;mpg_US&#39;
+units(mtcars$wt) = &#39;kg&#39;
+mtcars$mpg %&gt;% head</code></pre>
+<pre><code>## Units: [mpg_US]
+## [1] 21.0 21.0 22.8 21.4 18.7 18.1</code></pre>
+<p>If we want to convert the unit mpg(US) to SI unit km/L, we need to do the below.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
+<pre class="r"><code>units(mtcars$mpg) = &#39;km/L&#39;
+mtcars$mpg %&gt;% head</code></pre>
+<pre><code>## Units: [km/L]
+## [1] 8.928017 8.928017 9.693276 9.098075 7.950187 7.695101</code></pre>
+<p>We can easily plot the relation between <code>mpg</code> and <code>wt</code> using the package <code>ggplot2</code>. But do not forget to load <code>ggforce</code> beforehand.</p>
+<pre class="r"><code>library(ggplot2)
+library(ggforce) # without this, the code below will raise error!</code></pre>
+<pre><code>## Registered S3 method overwritten by &#39;ggforce&#39;:
+##   method           from 
+##   scale_type.units units</code></pre>
+<pre class="r"><code>ggplot(data=mtcars,
+       aes(x=mpg, y=wt)) + 
+  geom_point()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<p>Use <code>units::units()&lt;-</code> for setting unit for measurements.
+Use <code>install_unit(name=, def=)</code> for introducing new units.
+Use <code>valid_udunits()</code> to show all the units available from the package <code>units</code>.</p>
+<pre class="r"><code>valid_udunits() %&gt;% head </code></pre>
+<pre><code>## udunits database from C:/Users/Seul/Documents/R/win-library/4.1/units/share/udunits/udunits2.xml</code></pre>
+<pre><code>## # A tibble: 6 x 11
+##   symbol symbol_aliases name_singular name_singular_aliases name_plural
+##   &lt;chr&gt;  &lt;chr&gt;          &lt;chr&gt;         &lt;chr&gt;                 &lt;chr&gt;      
+## 1 m      &quot;&quot;             meter         &quot;metre&quot;               &quot;&quot;         
+## 2 kg     &quot;&quot;             kilogram      &quot;&quot;                    &quot;&quot;         
+## 3 s      &quot;&quot;             second        &quot;&quot;                    &quot;&quot;         
+## 4 A      &quot;&quot;             ampere        &quot;&quot;                    &quot;&quot;         
+## 5 K      &quot;&quot;             kelvin        &quot;&quot;                    &quot;&quot;         
+## 6 mol    &quot;&quot;             mole          &quot;&quot;                    &quot;&quot;         
+## # ... with 6 more variables: name_plural_aliases &lt;chr&gt;, def &lt;chr&gt;,
+## #   definition &lt;chr&gt;, comment &lt;chr&gt;, dimensionless &lt;lgl&gt;, source_xml &lt;chr&gt;</code></pre>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://en.wikipedia.org/wiki/International_System_of_Units">International System of Units</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>It is well known that the failure of MCO(<strong>M</strong>ars <strong>C</strong>limate <strong>O</strong>rbiter) is due to inadequate unit coversion.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>If the objective is simply to reset the unit, do <code>units(mtcars$mpg)=NULL; units(mtcars$mpg)='km/L'</code>. This will not convert unit but just replace the unit with another unit.<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>

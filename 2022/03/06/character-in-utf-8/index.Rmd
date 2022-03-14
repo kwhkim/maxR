@@ -1,0 +1,132 @@
+---
+title: character in UTF-8
+author: KwH Kim
+date: '2022-03-06'
+slug: character-in-utf-8
+categories: ['R']
+tags: ['character', 'preprocessing', 'encoding']
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Encoding
+
+Computer can store data only with 0s and 1s. Putting together a lot of 0s and 1s, a computer can present a bigger number. But if it want to store a letter, it needs a mapping of a number onto a letter. This mapping is called "**encoding**".
+
+**Encoding** depends on the letters to store. Letters people use are different for different countries and languages. There are over 1000 encodings worldwide. But over 90% of the encodings used in the internet is UTF-8[^refutf8].
+
+[^refutf8]: https://w3techs.com/technologies/cross/character_encoding/ranking
+
+## Unicode
+
+We are in an internet era. It has become ordinary to send documents over the border of a country. But encodings usually were made for use in one country. So the documents from foreign country could be not read properly because the encoding was different[^mojibake]. 
+
+[^mojibake]: https://en.wikipedia.org/wiki/Mojibake
+
+Unicode was developed for this kind of problem. Unicode tries to have a mapping for all the characters that exist today or existed from the beginning of the history. Unicode Consortium[^uniconsort] is a non-profit oganization that develops Unicode. The number that a character maps to is called **code point**. You can check the Code points from **Unicode Code Chart**[^unicodechart]. As the Unicode version increases, the number of character that Unicode can represent is also increasing[^charactersincrease].
+
+[^uniconsort]: https://en.wikipedia.org/wiki/Unicode_Consortium
+
+[^unicodechart]:http://www.unicode.org/charts/
+
+[^charactersincrease]: There are several reasons for this. Unicode can embrace new languages or new characters can be found for only embraced languages.
+
+Version 1.0.0(1991) supported 7129 characters from 24 languages. Version 14(2021) includes 144,697 characters from 159 languages. Version 6.0(2010 decided to support emojis because celluar phone makers demanded and it could have evloved into different encodings for different phone makers because of emojis, which was the reason for Unicode. Unicode tried to incorporate all the characters worldwide so any encodings can be converted to Unicode. Unicode can be materialized into specific encoding scheme such as UTF-8, UTF-16, UTF-32. Those encoding scheme add additional layer for compression. 
+
+## `character` in R
+
+R supports UTF-8. If a `character` is not in UTF-8, it can be converted to UTF-8 using the following code.
+
+```{r, collapse = TRUE}
+x = '한글' # Hangul in Korean
+y = iconv(x, to='UTF-8')
+x
+y
+Encoding(x)
+Encoding(y)
+```
+
+UTF-8 is powerful. It can represent almost any characters. But the font is limited. Most fonts can not display all the characters. So there are cases that characters stored in a vector can not be properly displayed because the font in use does not support.
+
+I propose the following function `u_chars` for inspection of UTF-8 characters.
+
+## `u_chars`
+
+The following function `u_chars()` utilize the package `Unicode` and prints out the information  of each character for a string. Unicode characters have labels so characters that can be not displayed properly can be identified.
+
+```{r}
+u_chars = function(s, encodings) {
+  stopifnot(class(s) == "character")
+  stopifnot(length(s)==1)
+  if (Encoding(s) == "unknown") {
+    s = iconv(s, to = 'UTF-8')
+  } else if (Encoding(s) != 'UTF-8') {
+    s = iconv(s, from = Encoding(s), to='UTF-8')  } 
+  
+  dat = data.frame(ch = unlist(strsplit(s, ""))) # split characters
+  cps = sapply(dat$ch, utf8ToInt)                # unicode codepoint
+  cps_hex = sprintf("%02x", cps)                 # convert to hexidecimal number
+  
+  # hexidecimal numbers are displayed in one of the following styles "  ..ff", "  a1ff", "011f3e"
+  # first two digits are rarely used so they are shown blank when they are 00
+  # The following two digits are 00 when the code is in ASCII so they are shown ..
+  cps_hex = 
+    ifelse(nchar(cps_hex) > 2,
+           stringi::stri_pad(cps_hex, width = 4, side = 'left', pad = '0'),
+           stringi::stri_pad(cps_hex, width = 4, side = 'left', pad = '.'))
+  dat$codepoint = 
+    ifelse(nchar(cps_hex) > 4,
+           stringi::stri_pad(cps_hex, width=6, side='left', pad='0'),
+           stringi::stri_pad(cps_hex, width=6, side='left', pad=' '))
+  
+  # if given encodings=
+  if (!missing(encodings)) {
+    for (encoding in encodings) {
+      ch_enc = vector(mode='character', length=nrow(dat))
+      for (i in 1:nrow(dat)) {
+        ch = dat$ch[i]
+        ch_enc[i] = 
+          paste0(sprintf("%02x", 
+                         as.integer(unlist(
+                           iconv(ch, from = 'UTF-8', 
+                                     to=encoding, toRaw=TRUE)))),
+                 collapse = ' ')
+      }
+      dat$enc = ch_enc
+      names(dat)[length(names(dat))] = paste0('enc.', encoding)  
+    }
+  }
+  dat$label = Unicode::u_char_label(cps); 
+  dat
+}
+```
+
+```{r}
+u_chars("\ufeff\u0041\ub098\u2211\U00010384")
+```
+
+You can see how the characters will be encoded in other encoding scheme using `encodings = `.
+
+```{r}
+u_chars("\ufeff\u0041똠\u2211\U00010384", encodings = c("CP949", "latin1"))
+```
+
+
+## Another application
+
+```{r, collapse = TRUE}
+library(stringi)
+x = '\u0423\u043a\u0440\u0430\u0457\u043d\u0430'
+Encoding(x)
+#x = iconv(x, to='UTF-8') 
+cat(x); cat('\n')
+y = stri_trans_nfd(x)
+cat(y); cat('\n')
+u_chars(x)
+u_chars(y)
+
+```
