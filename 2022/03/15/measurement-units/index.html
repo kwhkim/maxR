@@ -1,14 +1,79 @@
----
-title: measurement units
-author: KwH Kim
-date: '2022-03-15'
-slug: measurement-units
-categories: ["R"]
-tags: ["visualization", "preprocessing"]
-output: html_document
----
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.93.1" />
 
-<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+<title>measurement units - R to the max</title>
+<meta property="og:title" content="measurement units - R to the max">
+
+
+  <link href='https://kwhkim.github.io/maxR/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/maxR/css/fonts.css" media="all">
+<link rel="stylesheet" href="/maxR/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/maxR/" class="nav-logo">
+    <img src="/maxR/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/maxR/about/">About</a></li>
+    
+    <li><a href="/maxR/categories/">Categories</a></li>
+    
+    <li><a href="/maxR/tags/">Tags</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">3 min read</span>
+    
+
+    <h1 class="article-title">measurement units</h1>
+
+    
+    <span class="article-date">2022-03-15</span>
+    
+
+    <div class="article-content">
+      
+<script src="https://kwhkim.github.io/maxR/2022/03/15/measurement-units/index_files/header-attrs/header-attrs.js"></script>
 
 
 <p>Data <code>mtcars</code> has a column named <code>mpg</code>. <code>mpg</code> means <strong>m</strong>iles <strong>p</strong>er <strong>g</strong>allon. ‘Mile’ and ‘gallon’ are units for length and volume. A mile is approximately 1.6 kilometers and a gallon is approximately 3.7 liters. Mile and gallon sound unfamiliar to people who live outside England or U.S.A. because international standard units for length and volume are meter and liter.</p>
@@ -50,13 +115,19 @@ library(ggforce) # without this, the code below will raise error!</code></pre>
 <pre class="r"><code>ggplot(data=mtcars,
        aes(x=mpg, y=wt)) + 
   geom_point()</code></pre>
-<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="https://kwhkim.github.io/maxR/2022/03/15/measurement-units/index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 </div>
 <div id="summary" class="section level2">
 <h2>Summary</h2>
-<p>Use <code>units::units()&lt;-</code> for setting unit for measurements.
-Use <code>install_unit(name=, def=)</code> for introducing new units.
-Use <code>valid_udunits()</code> to show all the units available from the package <code>units</code>.</p>
+<ul>
+<li>Use <code>units::units()&lt;-</code> for setting unit for measurements.
+<ul>
+<li>Use <code>units::units()&lt;-</code> for converting unit.</li>
+<li>Use <code>units::units()&lt;-NULL</code> for deleting unit.</li>
+</ul></li>
+<li>Use <code>install_unit(name=, def=)</code> for introducing new units.</li>
+<li>Use <code>valid_udunits()</code> to show all the units available from the package <code>units</code>.</li>
+</ul>
 <pre class="r"><code>valid_udunits() %&gt;% head </code></pre>
 <pre><code>## udunits database from C:/Users/Seul/Documents/R/win-library/4.1/units/share/udunits/udunits2.xml</code></pre>
 <pre><code>## # A tibble: 6 x 11
@@ -79,3 +150,46 @@ Use <code>valid_udunits()</code> to show all the units available from the packag
 <li id="fn3"><p>If the objective is simply to reset the unit, do <code>units(mtcars$mpg)=NULL; units(mtcars$mpg)='km/L'</code>. This will not convert unit but just replace the unit with another unit.<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/maxR/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/maxR/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/maxR/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

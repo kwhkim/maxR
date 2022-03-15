@@ -5,8 +5,102 @@
     <link>https://kwhkim.github.io/maxR/tags/preprocessing/</link>
     <description>Recent content in preprocessing on R to the max</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <lastBuildDate>Sun, 06 Mar 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://kwhkim.github.io/maxR/tags/preprocessing/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 15 Mar 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://kwhkim.github.io/maxR/tags/preprocessing/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>measurement units</title>
+      <link>https://kwhkim.github.io/maxR/2022/03/15/measurement-units/</link>
+      <pubDate>Tue, 15 Mar 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://kwhkim.github.io/maxR/2022/03/15/measurement-units/</guid>
+      <description>
+&lt;script src=&#34;https://kwhkim.github.io/maxR/2022/03/15/measurement-units/index_files/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
+
+
+&lt;p&gt;Data &lt;code&gt;mtcars&lt;/code&gt; has a column named &lt;code&gt;mpg&lt;/code&gt;. &lt;code&gt;mpg&lt;/code&gt; means &lt;strong&gt;m&lt;/strong&gt;iles &lt;strong&gt;p&lt;/strong&gt;er &lt;strong&gt;g&lt;/strong&gt;allon. ‘Mile’ and ‘gallon’ are units for length and volume. A mile is approximately 1.6 kilometers and a gallon is approximately 3.7 liters. Mile and gallon sound unfamiliar to people who live outside England or U.S.A. because international standard units for length and volume are meter and liter.&lt;/p&gt;
+&lt;p&gt;In this post, we will learn how to convert a unit to another unit, for instance, we will convert mpg to km/L, which is more comprehensible to people who use SI units.&lt;a href=&#34;#fn1&#34; class=&#34;footnote-ref&#34; id=&#34;fnref1&#34;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;div id=&#34;units-in-r&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Units in R&lt;/h2&gt;
+&lt;p&gt;Vectors(the most common data structure in R) do not contain information of measurement units. Units are implicit and units should be converted by users. But as history tells us, unit conversion should be treated carefully because it can cause serious damage to the whole project&lt;a href=&#34;#fn2&#34; class=&#34;footnote-ref&#34; id=&#34;fnref2&#34;&gt;&lt;sup&gt;2&lt;/sup&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;package-units&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Package &lt;code&gt;units&lt;/code&gt;&lt;/h2&gt;
+&lt;p&gt;Using the package &lt;code&gt;units&lt;/code&gt;, we can easily convert units accurately. And the data is plotted, units will be included in the x- or y-label automatically.&lt;/p&gt;
+&lt;p&gt;First install package &lt;code&gt;units&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;install.packages(&amp;#39;units&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And load all the necessary packages and data&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(units)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## udunits database from C:/Users/Seul/Documents/R/win-library/4.1/units/share/udunits/udunits2.xml&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(dplyr, warn.conflicts = FALSE)
+data(mtcars)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;To get the information about the data &lt;code&gt;mtcars&lt;/code&gt;, we can do &lt;code&gt;help(mtcars)&lt;/code&gt;. It will show the measurement unit for each column. &lt;code&gt;mpg&lt;/code&gt; is measured in unit of &lt;strong&gt;m&lt;/strong&gt;iles &lt;strong&gt;p&lt;/strong&gt;er &lt;strong&gt;g&lt;/strong&gt;allon, &lt;code&gt;disp&lt;/code&gt; is measured in unit of cubic inch, &lt;code&gt;hp&lt;/code&gt; is measured in unit of gross &lt;strong&gt;h&lt;/strong&gt;orse&lt;strong&gt;p&lt;/strong&gt;ower, &lt;code&gt;wt&lt;/code&gt; is measured in unit of 1000 lbs, and &lt;code&gt;qsec&lt;/code&gt; is measured in unit of sec per 1/4 mile.&lt;/p&gt;
+&lt;p&gt;It is sad that mpg(&lt;strong&gt;m&lt;/strong&gt;iles &lt;strong&gt;p&lt;/strong&gt;er &lt;strong&gt;g&lt;/strong&gt;allon) is not registered in the package &lt;code&gt;units&lt;/code&gt;, but we can register it ourselves. The code below installs a new unit called &lt;code&gt;mpg_US&lt;/code&gt; as &lt;code&gt;interantional_mile/US_liquid_gallon&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;install_unit(name=&amp;#39;mpg_US&amp;#39;, def=&amp;#39;international_mile/US_liquid_gallon&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we can use &lt;code&gt;mpg_US&lt;/code&gt;. &lt;code&gt;mtcars$mpg&lt;/code&gt; is measured in unit of mpg(US) and &lt;code&gt;mtcars$wt&lt;/code&gt; is measured in unit of kilogram.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;units(mtcars$mpg) = &amp;#39;mpg_US&amp;#39;
+units(mtcars$wt) = &amp;#39;kg&amp;#39;
+mtcars$mpg %&amp;gt;% head&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Units: [mpg_US]
+## [1] 21.0 21.0 22.8 21.4 18.7 18.1&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If we want to convert the unit mpg(US) to SI unit km/L, we need to do the below.&lt;a href=&#34;#fn3&#34; class=&#34;footnote-ref&#34; id=&#34;fnref3&#34;&gt;&lt;sup&gt;3&lt;/sup&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;units(mtcars$mpg) = &amp;#39;km/L&amp;#39;
+mtcars$mpg %&amp;gt;% head&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Units: [km/L]
+## [1] 8.928017 8.928017 9.693276 9.098075 7.950187 7.695101&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can easily plot the relation between &lt;code&gt;mpg&lt;/code&gt; and &lt;code&gt;wt&lt;/code&gt; using the package &lt;code&gt;ggplot2&lt;/code&gt;. But do not forget to load &lt;code&gt;ggforce&lt;/code&gt; beforehand.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(ggplot2)
+library(ggforce) # without this, the code below will raise error!&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Registered S3 method overwritten by &amp;#39;ggforce&amp;#39;:
+##   method           from 
+##   scale_type.units units&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(data=mtcars,
+       aes(x=mpg, y=wt)) + 
+  geom_point()&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;https://kwhkim.github.io/maxR/2022/03/15/measurement-units/index_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;summary&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Summary&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Use &lt;code&gt;units::units()&amp;lt;-&lt;/code&gt; for setting unit for measurements.
+&lt;ul&gt;
+&lt;li&gt;Use &lt;code&gt;units::units()&amp;lt;-&lt;/code&gt; for converting unit.&lt;/li&gt;
+&lt;li&gt;Use &lt;code&gt;units::units()&amp;lt;-NULL&lt;/code&gt; for deleting unit.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Use &lt;code&gt;install_unit(name=, def=)&lt;/code&gt; for introducing new units.&lt;/li&gt;
+&lt;li&gt;Use &lt;code&gt;valid_udunits()&lt;/code&gt; to show all the units available from the package &lt;code&gt;units&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;valid_udunits() %&amp;gt;% head &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## udunits database from C:/Users/Seul/Documents/R/win-library/4.1/units/share/udunits/udunits2.xml&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 6 x 11
+##   symbol symbol_aliases name_singular name_singular_aliases name_plural
+##   &amp;lt;chr&amp;gt;  &amp;lt;chr&amp;gt;          &amp;lt;chr&amp;gt;         &amp;lt;chr&amp;gt;                 &amp;lt;chr&amp;gt;      
+## 1 m      &amp;quot;&amp;quot;             meter         &amp;quot;metre&amp;quot;               &amp;quot;&amp;quot;         
+## 2 kg     &amp;quot;&amp;quot;             kilogram      &amp;quot;&amp;quot;                    &amp;quot;&amp;quot;         
+## 3 s      &amp;quot;&amp;quot;             second        &amp;quot;&amp;quot;                    &amp;quot;&amp;quot;         
+## 4 A      &amp;quot;&amp;quot;             ampere        &amp;quot;&amp;quot;                    &amp;quot;&amp;quot;         
+## 5 K      &amp;quot;&amp;quot;             kelvin        &amp;quot;&amp;quot;                    &amp;quot;&amp;quot;         
+## 6 mol    &amp;quot;&amp;quot;             mole          &amp;quot;&amp;quot;                    &amp;quot;&amp;quot;         
+## # ... with 6 more variables: name_plural_aliases &amp;lt;chr&amp;gt;, def &amp;lt;chr&amp;gt;,
+## #   definition &amp;lt;chr&amp;gt;, comment &amp;lt;chr&amp;gt;, dimensionless &amp;lt;lgl&amp;gt;, source_xml &amp;lt;chr&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnotes&#34;&gt;
+&lt;hr /&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn1&#34;&gt;&lt;p&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/International_System_of_Units&#34;&gt;International System of Units&lt;/a&gt;&lt;a href=&#34;#fnref1&#34; class=&#34;footnote-back&#34;&gt;↩︎&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn2&#34;&gt;&lt;p&gt;It is well known that the failure of MCO(&lt;strong&gt;M&lt;/strong&gt;ars &lt;strong&gt;C&lt;/strong&gt;limate &lt;strong&gt;O&lt;/strong&gt;rbiter) is due to inadequate unit coversion.&lt;a href=&#34;#fnref2&#34; class=&#34;footnote-back&#34;&gt;↩︎&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li id=&#34;fn3&#34;&gt;&lt;p&gt;If the objective is simply to reset the unit, do &lt;code&gt;units(mtcars$mpg)=NULL; units(mtcars$mpg)=&#39;km/L&#39;&lt;/code&gt;. This will not convert unit but just replace the unit with another unit.&lt;a href=&#34;#fnref3&#34; class=&#34;footnote-back&#34;&gt;↩︎&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
+      
+            <tag>visualization</tag>
+      
+            <tag>preprocessing</tag>
+      
+      
+            <category>R</category>
+      
+    </item>
+    
     <item>
       <title>character in UTF-8</title>
       <link>https://kwhkim.github.io/maxR/2022/03/06/character-in-utf-8/</link>
