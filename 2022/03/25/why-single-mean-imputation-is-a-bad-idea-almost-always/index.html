@@ -62,7 +62,7 @@
 
   <article class="article">
     
-    <span class="article-duration">8 min read</span>
+    <span class="article-duration">7 min read</span>
     
 
     <h1 class="article-title">Why mean substition is a bad idea, almost always</h1>
@@ -154,20 +154,11 @@
 <h2>Simulation</h2>
 <div id="data" class="section level3">
 <h3>Data</h3>
-<pre class="r"><code>library(dplyr)</code></pre>
-<pre><code>## Warning: package &#39;dplyr&#39; was built under R version 4.1.3</code></pre>
-<pre><code>## 
-## Attaching package: &#39;dplyr&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:stats&#39;:
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>library(tidyr)
-library(ggplot2)</code></pre>
-<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.1.3</code></pre>
-<pre class="r"><code># sample size 100
+<pre class="r"><code>library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# sample size 100
 n &lt;- 100
 # height mean 170, std 15
 h &lt;- rnorm(100, 170, 15)  
@@ -197,22 +188,22 @@ ggplot(dat, aes(x=h, y=w_complete, col=factor(w_missing))) +
 <p>Estimated weight mean from using complete data seems biased.</p>
 <pre class="r"><code>## average weight?
 mean(dat$w_complete)</code></pre>
-<pre><code>## [1] 80.40551</code></pre>
+<pre><code>## [1] 79.86512</code></pre>
 <pre class="r"><code>wmean_est = mean(dat$w, na.rm = TRUE)
 wmean_est</code></pre>
-<pre><code>## [1] 77.90547</code></pre>
+<pre><code>## [1] 76.49322</code></pre>
 <pre class="r"><code>t.test(dat$w)</code></pre>
 <pre><code>## 
 ##  One Sample t-test
 ## 
 ## data:  dat$w
-## t = 51.013, df = 47, p-value &lt; 2.2e-16
+## t = 58.46, df = 47, p-value &lt; 2.2e-16
 ## alternative hypothesis: true mean is not equal to 0
 ## 95 percent confidence interval:
-##  74.83319 80.97774
+##  73.86092 79.12552
 ## sample estimates:
 ## mean of x 
-##  77.90547</code></pre>
+##  76.49322</code></pre>
 </div>
 <div id="mean-substitution" class="section level3">
 <h3>Mean substitution</h3>
@@ -222,21 +213,21 @@ dat$w_imputed &lt;- ifelse(dat$w_missing, w_mean, w)
 
 wmean_est = mean(dat$w_imputed)
 wmean_est</code></pre>
-<pre><code>## [1] 77.90547</code></pre>
+<pre><code>## [1] 76.49322</code></pre>
 <pre class="r"><code>res &lt;- t.test(dat$w_imputed)
 res</code></pre>
 <pre><code>## 
 ##  One Sample t-test
 ## 
 ## data:  dat$w_imputed
-## t = 106.86, df = 99, p-value &lt; 2.2e-16
+## t = 122.46, df = 99, p-value &lt; 2.2e-16
 ## alternative hypothesis: true mean is not equal to 0
 ## 95 percent confidence interval:
-##  76.45893 79.35200
+##  75.25384 77.73260
 ## sample estimates:
 ## mean of x 
-##  77.90547</code></pre>
-<p>The population weight mean is 81.6 but the estimated mean is 77.91. The confidence inteval is 76.46-79.35.</p>
+##  76.49322</code></pre>
+<p>The population weight mean is 81.6 but the estimated mean is 76.49. The confidence inteval is 75.25-77.73.</p>
 </div>
 <div id="regression-imputation" class="section level3">
 <h3>Regression imputation</h3>
@@ -248,35 +239,35 @@ dat$w_imputed &lt;- ifelse(dat$w_missing, w_hat, w)
 
 wmean_est = mean(dat$w_imputed)
 wmean_est</code></pre>
-<pre><code>## [1] 80.44631</code></pre>
+<pre><code>## [1] 79.89369</code></pre>
 <pre class="r"><code>res &lt;- t.test(dat$w_imputed)
 res</code></pre>
 <pre><code>## 
 ##  One Sample t-test
 ## 
 ## data:  dat$w_imputed
-## t = 84.369, df = 99, p-value &lt; 2.2e-16
+## t = 94.065, df = 99, p-value &lt; 2.2e-16
 ## alternative hypothesis: true mean is not equal to 0
 ## 95 percent confidence interval:
-##  78.55436 82.33827
+##  78.20839 81.57898
 ## sample estimates:
 ## mean of x 
-##  80.44631</code></pre>
-<p>Estimated weight value is 80.45, 95%-confidence interval is 78.55-82.34. Compare this with estimated weight mean from listwise-deletion.</p>
+##  79.89369</code></pre>
+<p>Estimated weight value is 79.89, 95%-confidence interval is 78.21-81.58. Compare this with estimated weight mean from listwise-deletion.</p>
 <pre class="r"><code>mean(dat$w_complete)</code></pre>
-<pre><code>## [1] 80.40551</code></pre>
+<pre><code>## [1] 79.86512</code></pre>
 <pre class="r"><code>t.test(dat$w_complete)</code></pre>
 <pre><code>## 
 ##  One Sample t-test
 ## 
 ## data:  dat$w_complete
-## t = 75.707, df = 99, p-value &lt; 2.2e-16
+## t = 81.261, df = 99, p-value &lt; 2.2e-16
 ## alternative hypothesis: true mean is not equal to 0
 ## 95 percent confidence interval:
-##  78.29816 82.51286
+##  77.91499 81.81525
 ## sample estimates:
 ## mean of x 
-##  80.40551</code></pre>
+##  79.86512</code></pre>
 </div>
 </div>
 <div class="footnotes">
