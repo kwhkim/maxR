@@ -42,6 +42,9 @@
 &lt;p&gt;It is like flipping coin again. But it could be a different coin for different value of explanatory variables.&lt;/p&gt;
 &lt;p&gt;If it is neither MCAR nor MAR, it is called &lt;strong&gt;NMAR&lt;/strong&gt;. For example, if the missingness of weight is dependent on weight itself, it is NMAR.&lt;/p&gt;
 &lt;p&gt;For predictive models, it is sufficient of check if missingness is random conditional on other observed variables. But for causal model, we should consider if there is unobserved variables that might cause or be related to missingness. For now, I will consider only predictive models.&lt;a href=&#34;#fn1&#34; class=&#34;footnote-ref&#34; id=&#34;fnref1&#34;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;[&lt;strong&gt;AD&lt;/strong&gt;] Book for &lt;strong&gt;R power users&lt;/strong&gt; : &lt;a href=&#34;http://books.sumeun.org/?p=190&#34;&gt;Data Analysis with R: Data Preprocessing and Visualization&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/div&gt;
 &lt;div id=&#34;why-not-just-use-complete-data&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Why not just use complete data?&lt;/h2&gt;
@@ -83,6 +86,9 @@
 &lt;div id=&#34;estimating-mean-y-mar-mean-substitution-1&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Estimating mean &lt;span class=&#34;math inline&#34;&gt;\(y\)&lt;/span&gt; : MAR &amp;amp; mean substitution&lt;/h2&gt;
 &lt;p&gt;So we would better be using regression mean(estimated weight mean given the height). Using the conditional mean for missing data might lead to too small variance estimate but it is not biased.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;[&lt;strong&gt;AD&lt;/strong&gt;] Book for &lt;strong&gt;R power users&lt;/strong&gt; : &lt;a href=&#34;http://books.sumeun.org/?p=190&#34;&gt;Data Analysis with R: Data Preprocessing and Visualization&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/div&gt;
 &lt;div id=&#34;simulation&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Simulation&lt;/h2&gt;
@@ -131,22 +137,22 @@ ggplot(dat, aes(x=h, y=w_complete, col=factor(w_missing))) +
 &lt;p&gt;Estimated weight mean from using complete data seems biased.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;## average weight?
 mean(dat$w_complete)&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;## [1] 81.50196&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 80.40551&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wmean_est = mean(dat$w, na.rm = TRUE)
 wmean_est&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;## [1] 78.40121&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 77.90547&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;t.test(dat$w)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;## 
 ##  One Sample t-test
 ## 
 ## data:  dat$w
-## t = 59.392, df = 50, p-value &amp;lt; 2.2e-16
+## t = 51.013, df = 47, p-value &amp;lt; 2.2e-16
 ## alternative hypothesis: true mean is not equal to 0
 ## 95 percent confidence interval:
-##  75.74977 81.05265
+##  74.83319 80.97774
 ## sample estimates:
 ## mean of x 
-##  78.40121&lt;/code&gt;&lt;/pre&gt;
+##  77.90547&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;mean-substitution&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Mean substitution&lt;/h3&gt;
@@ -156,21 +162,21 @@ dat$w_imputed &amp;lt;- ifelse(dat$w_missing, w_mean, w)
 
 wmean_est = mean(dat$w_imputed)
 wmean_est&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;## [1] 78.40121&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 77.90547&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;res &amp;lt;- t.test(dat$w_imputed)
 res&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;## 
 ##  One Sample t-test
 ## 
 ## data:  dat$w_imputed
-## t = 117.02, df = 99, p-value &amp;lt; 2.2e-16
+## t = 106.86, df = 99, p-value &amp;lt; 2.2e-16
 ## alternative hypothesis: true mean is not equal to 0
 ## 95 percent confidence interval:
-##  77.07186 79.73056
+##  76.45893 79.35200
 ## sample estimates:
 ## mean of x 
-##  78.40121&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The population weight mean is 81.6 but the estimated mean is 78.4. The confidence inteval is 77.07-79.73.&lt;/p&gt;
+##  77.90547&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The population weight mean is 81.6 but the estimated mean is 77.91. The confidence inteval is 76.46-79.35.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;regression-imputation&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Regression imputation&lt;/h3&gt;
@@ -182,35 +188,35 @@ dat$w_imputed &amp;lt;- ifelse(dat$w_missing, w_hat, w)
 
 wmean_est = mean(dat$w_imputed)
 wmean_est&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;## [1] 81.63952&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 80.44631&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;res &amp;lt;- t.test(dat$w_imputed)
 res&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;## 
 ##  One Sample t-test
 ## 
 ## data:  dat$w_imputed
-## t = 90.66, df = 99, p-value &amp;lt; 2.2e-16
+## t = 84.369, df = 99, p-value &amp;lt; 2.2e-16
 ## alternative hypothesis: true mean is not equal to 0
 ## 95 percent confidence interval:
-##  79.85274 83.42631
+##  78.55436 82.33827
 ## sample estimates:
 ## mean of x 
-##  81.63952&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Estimated weight value is 81.64, 95%-confidence interval is 79.85-83.43. Compare this with estimated weight mean from listwise-deletion.&lt;/p&gt;
+##  80.44631&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Estimated weight value is 80.45, 95%-confidence interval is 78.55-82.34. Compare this with estimated weight mean from listwise-deletion.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;mean(dat$w_complete)&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;## [1] 81.50196&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 80.40551&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;t.test(dat$w_complete)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;## 
 ##  One Sample t-test
 ## 
 ## data:  dat$w_complete
-## t = 78.695, df = 99, p-value &amp;lt; 2.2e-16
+## t = 75.707, df = 99, p-value &amp;lt; 2.2e-16
 ## alternative hypothesis: true mean is not equal to 0
 ## 95 percent confidence interval:
-##  79.44696 83.55696
+##  78.29816 82.51286
 ## sample estimates:
 ## mean of x 
-##  81.50196&lt;/code&gt;&lt;/pre&gt;
+##  80.40551&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div class=&#34;footnotes&#34;&gt;
