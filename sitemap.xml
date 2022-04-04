@@ -3,24 +3,30 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://kwhkim.github.io/maxR/categories/</loc>
-    <lastmod>2022-03-15T00:00:00+00:00</lastmod>
+    <lastmod>2022-03-25T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kwhkim.github.io/maxR/tags/missing/</loc>
+    <lastmod>2022-03-25T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kwhkim.github.io/maxR/post/</loc>
+    <lastmod>2022-03-25T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kwhkim.github.io/maxR/categories/r/</loc>
+    <lastmod>2022-03-25T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kwhkim.github.io/maxR/</loc>
+    <lastmod>2022-03-25T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kwhkim.github.io/maxR/tags/</loc>
+    <lastmod>2022-03-25T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kwhkim.github.io/maxR/2022/03/25/why-single-mean-imputation-is-a-bad-idea-almost-always/</loc>
+    <lastmod>2022-03-25T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kwhkim.github.io/maxR/2022/03/15/measurement-units/</loc>
     <lastmod>2022-03-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kwhkim.github.io/maxR/post/</loc>
-    <lastmod>2022-03-15T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://kwhkim.github.io/maxR/tags/preprocessing/</loc>
-    <lastmod>2022-03-15T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kwhkim.github.io/maxR/categories/r/</loc>
-    <lastmod>2022-03-15T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kwhkim.github.io/maxR/</loc>
-    <lastmod>2022-03-15T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kwhkim.github.io/maxR/tags/</loc>
     <lastmod>2022-03-15T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kwhkim.github.io/maxR/tags/visualization/</loc>

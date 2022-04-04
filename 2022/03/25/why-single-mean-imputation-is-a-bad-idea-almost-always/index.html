@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.93.1" />
+
+
+<title>Why mean substition is a bad idea, almost always - R to the max</title>
+<meta property="og:title" content="Why mean substition is a bad idea, almost always - R to the max">
+
+
+  <link href='https://kwhkim.github.io/maxR/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/maxR/css/fonts.css" media="all">
+<link rel="stylesheet" href="/maxR/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/maxR/" class="nav-logo">
+    <img src="/maxR/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/maxR/about/">About</a></li>
+    
+    <li><a href="/maxR/categories/">Categories</a></li>
+    
+    <li><a href="/maxR/tags/">Tags</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">8 min read</span>
+    
+
+    <h1 class="article-title">Why mean substition is a bad idea, almost always</h1>
+
+    
+    <span class="article-date">2022-03-25</span>
+    
+
+    <div class="article-content">
+      
+<script src="https://kwhkim.github.io/maxR/2022/03/25/why-single-mean-imputation-is-a-bad-idea-almost-always/index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>Missing values can cause bias. So most books introduce imputation methods like mean substitution or LOCF(<strong>L</strong>ast <strong>O</strong>bservation <strong>C</strong>arried <strong>F</strong>orward). But in this post, I will explain why people say unconditional mean substitution is bad with a simple example.</p>
+<div id="mechanisms-of-missingness" class="section level2">
+<h2>Mechanisms of Missingness</h2>
+<p>Little and Rubin(2002) categorized missingness into three categories.</p>
+<ol style="list-style-type: decimal">
+<li>MCAR(<strong>M</strong>issing <strong>C</strong>ompmletely <strong>A</strong>t <strong>R</strong>andom)</li>
+<li>MAR(<strong>M</strong>issing <strong>A</strong>t <strong>R</strong>andom)</li>
+<li>NMAR(<strong>N</strong>ot <strong>M</strong>issing <strong>A</strong>t <strong>R</strong>andom)</li>
+</ol>
+<p>In simple terms, MCAR is missing <strong>unconditionally</strong> random, MAR is missing <strong>conditionally</strong> random. And NMAR is neither of the both.</p>
+<p>Here is a (unrealistic, but) simple example model.</p>
+<p><span class="math display">\[\textrm{Weight} = 0.48 \times \textrm{Height} + e\]</span></p>
+<p>I will cover only the missing weight values in this post. Assume that we can somehow find out what the real value is even if it is missing.</p>
+<p>If missingness of weight is <strong>not related to other variables including itself</strong>, it is called <strong>MCAR</strong>. It is like missingness is <strong>totally determined by flipping coins</strong>.</p>
+<p>If missingness of weight is <strong>conditional on height(and other variables in the model) but independent of the weight value</strong>, it is called <strong>MAR</strong>. Overall distribution of weight can be different dependent on missingness, but given the information of height(and other variables in the model), it is identical. Missing is independent of weight, given the height(and other variables in the model). Given the height (and other variables in the model), missing occurs independent of the height. So we can say missingness is <strong>determined by flipping coins conditional on the value of the height(and other variables in the model)</strong>.</p>
+<p>If we digest the above using some of the basic probability rules, we get to the conclusion below.</p>
+<blockquote>
+<p>Missing value distribution is not different from observed value distribution, given the value of other variables in the model.</p>
+</blockquote>
+<p>The following might be true.</p>
+<p><span class="math display">\[p(y|y_{\textrm{missing}}) \neq p(y|y_{\textrm{observed}})\]</span></p>
+<p>But the following holds true.</p>
+<p><span class="math display">\[p(y|y_{\textrm{missing}}, x_1, x_2, \cdots, x_p) = p(y|y_{\textrm{observed}}, x_1, x_2, \cdots, x_p)\]</span></p>
+<p>It is like flipping coin again. But it could be a different coin for different value of explanatory variables.</p>
+<p>If it is neither MCAR nor MAR, it is called <strong>NMAR</strong>. For example, if the missingness of weight is dependent on weight itself, it is NMAR.</p>
+<p>For predictive models, it is sufficient of check if missingness is random conditional on other observed variables. But for causal model, we should consider if there is unobserved variables that might cause or be related to missingness. For now, I will consider only predictive models.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
+</div>
+<div id="why-not-just-use-complete-data" class="section level2">
+<h2>Why not just use complete data?</h2>
+<p>The main problem is <strong>the bias</strong> introduced by missing data. As the number of missing increases, the bias could be huge. Another problem is decreasing sample size. Smaller sample size means <strong>less power</strong>.</p>
+</div>
+<div id="how-was-missing-data-handled-traditionally" class="section level2">
+<h2>How was missing data handled, traditionally?</h2>
+<ol style="list-style-type: decimal">
+<li>Listwise Deletion : Use only complete data</li>
+<li>Pairwise Deletion : Use all data available for each analysis</li>
+<li>Unconditional mean substitution</li>
+<li>Regression Imputation(Conditional mean substitution)</li>
+<li>Stochastic Regression Imputation</li>
+<li>Hot-Deck Imputation</li>
+<li>Last Observation Carried Forward</li>
+</ol>
+<p><strong>Listwise Deletion</strong> means using only complete data. Ignore any data with at least one missing.</p>
+<p><strong>Pairwise Deletion</strong> means using all available data for each estimates. Let’s say we need to compute covariance matrix of variables <span class="math inline">\(X_1\)</span> , <span class="math inline">\(X_2\)</span> , and <span class="math inline">\(Y\)</span> . We need to compute covariance of each pairs. We can use data missing in <span class="math inline">\(Y\)</span> for computing covariance of <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span> . This method can cause the problem of non-positive definite covariance matrix estimate.</p>
+<p><strong>Unconditional mean substitution</strong> imputes missing with the variable mean.</p>
+<p><strong>Regression Imputation</strong> utilizes regression analysis and impute missing with regression mean.</p>
+<p><strong>Stochastic Regression Imputation</strong> also uses regression analysis. It imputes missing with additional stochastic error term.</p>
+<p><strong>Hot-Deck Imputation</strong> imputes missing with values from other complete data. Wikipedia describes it as below.</p>
+<blockquote>
+<p>A once-common method of imputation was hot-deck imputation where a missing value was imputed from a <strong>randomly selected similar record</strong>. The term “hot deck” dates back to the storage of data on punched cards, and indicates that the information donors come from the same dataset as the recipients.</p>
+</blockquote>
+<p>Statisticians at the Census Bureau originally developed the hot-deck to deal with missing data in public-use data sets, and the procedure has a long history in survey applications (Scheuren, 2005; Enders, 2010).</p>
+<p><strong>Last Observation Carried Forward</strong> imputes missing with last observed value for the same group in the logitudinal data.</p>
+<p>Which one of those missing data analysis above is unbiased depends on the <strong>whether missing is MCAR, MAR, or NMAR</strong> and <strong>what one is estimating using the analysis</strong>. For instance, for estimating a regression parameters <span class="math inline">\(b_1\)</span> of <span class="math inline">\(y=b_0 + b_1 x_1\)</span>, listwise deletion is fairly appropriate for MCAR or MAR data, unless we care much about losing power. But estimating the mean <span class="math inline">\(y\)</span> averaging only observed <span class="math inline">\(y\)</span> could be seriously biased for MAR data if we use listwise deletion.</p>
+<p>Deletion or imputation methods above result in complete data and we can use complete data analysis method. That’s why we prefer imputation or deletion more than other special methods developed for dealing with missing data.</p>
+</div>
+<div id="estimating-mean-y-mar-listwise-deletion" class="section level2">
+<h2>Estimating mean <span class="math inline">\(y\)</span> : MAR &amp; listwise deletion</h2>
+<p>If <span class="math inline">\(y\)</span> is missing complete random, estimating <span class="math inline">\(y\)</span> using only observed data is okay because <span class="math inline">\(p(y|y_\textrm{missing}) = p(y|y_\textrm{observed})\)</span> .</p>
+</div>
+<div id="estimating-mean-y-mar-mean-substitution" class="section level2">
+<h2>Estimating mean <span class="math inline">\(y\)</span> : MAR &amp; mean substitution</h2>
+<p>If <span class="math inline">\(y\)</span> is missing conditionally random, using only observed data could be problematic because <span class="math inline">\(p(y|y_\textrm{missing}) \neq p(y|y_\textrm{observed})\)</span> . Let’s say <span class="math inline">\(p(\textrm{missing}) \sim \textrm{height}\)</span> . The probability of missing on weight increases as the height increases. In that case, the probability of missing weight is increased as the weight increases. So just using the complete data means deleting higher weight values and introducing a bias on estimating the mean weight.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p>
+</div>
+<div id="estimating-mean-y-mar-mean-substitution-1" class="section level2">
+<h2>Estimating mean <span class="math inline">\(y\)</span> : MAR &amp; mean substitution</h2>
+<p>So we would better be using regression mean(estimated weight mean given the height). Using the conditional mean for missing data might lead to too small variance estimate but it is not biased.</p>
+</div>
+<div id="simulation" class="section level2">
+<h2>Simulation</h2>
+<div id="data" class="section level3">
+<h3>Data</h3>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## Warning: package &#39;dplyr&#39; was built under R version 4.1.3</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(tidyr)
+library(ggplot2)</code></pre>
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.1.3</code></pre>
+<pre class="r"><code># sample size 100
+n &lt;- 100
+# height mean 170, std 15
+h &lt;- rnorm(100, 170, 15)  
+# true relation : weight =  0.48 * height
+# given height, weight distribution N(0,7^2)
+w &lt;- 0.48 * h  + rnorm(n, 0, 7)
+
+# weight population mean
+w_pop &lt;- 170*0.48 # 81.6
+h_pop &lt;- 170
+# missing is dependent on height
+w_missing &lt;- runif(n, 0, 1) &lt; (h-min(h))/(max(h)-min(h)) 
+
+dat = data.frame(h=h,
+                 w=ifelse(w_missing, NA, w),
+                 w_complete = w,
+                 w_missing = w_missing)
+
+#dat %&gt;% gather()
+ggplot(dat, aes(x=h, y=w_complete, col=factor(w_missing))) + 
+  geom_point() + 
+  scale_color_manual(values=c(&#39;black&#39;, &#39;grey&#39;))</code></pre>
+<p><img src="https://kwhkim.github.io/maxR/2022/03/25/why-single-mean-imputation-is-a-bad-idea-almost-always/index_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+</div>
+<div id="listwise-deletion" class="section level3">
+<h3>Listwise deletion</h3>
+<p>Estimated weight mean from using complete data seems biased.</p>
+<pre class="r"><code>## average weight?
+mean(dat$w_complete)</code></pre>
+<pre><code>## [1] 81.50196</code></pre>
+<pre class="r"><code>wmean_est = mean(dat$w, na.rm = TRUE)
+wmean_est</code></pre>
+<pre><code>## [1] 78.40121</code></pre>
+<pre class="r"><code>t.test(dat$w)</code></pre>
+<pre><code>## 
+##  One Sample t-test
+## 
+## data:  dat$w
+## t = 59.392, df = 50, p-value &lt; 2.2e-16
+## alternative hypothesis: true mean is not equal to 0
+## 95 percent confidence interval:
+##  75.74977 81.05265
+## sample estimates:
+## mean of x 
+##  78.40121</code></pre>
+</div>
+<div id="mean-substitution" class="section level3">
+<h3>Mean substitution</h3>
+<p>Simple but bad alternative in terms of bias for MAR data is mean susbstitution.</p>
+<pre class="r"><code>w_mean &lt;- mean(dat$w, na.rm=TRUE)
+dat$w_imputed &lt;- ifelse(dat$w_missing, w_mean, w)
+
+wmean_est = mean(dat$w_imputed)
+wmean_est</code></pre>
+<pre><code>## [1] 78.40121</code></pre>
+<pre class="r"><code>res &lt;- t.test(dat$w_imputed)
+res</code></pre>
+<pre><code>## 
+##  One Sample t-test
+## 
+## data:  dat$w_imputed
+## t = 117.02, df = 99, p-value &lt; 2.2e-16
+## alternative hypothesis: true mean is not equal to 0
+## 95 percent confidence interval:
+##  77.07186 79.73056
+## sample estimates:
+## mean of x 
+##  78.40121</code></pre>
+<p>The population weight mean is 81.6 but the estimated mean is 78.4. The confidence inteval is 77.07-79.73.</p>
+</div>
+<div id="regression-imputation" class="section level3">
+<h3>Regression imputation</h3>
+<p>We can use regression model to imput the missing values.</p>
+<pre class="r"><code>mod &lt;- lm(w ~ h)
+w_hat &lt;- predict(mod, dat)
+#w_hat &lt;- coef(mod) %*% rbind(1,dat$h)
+dat$w_imputed &lt;- ifelse(dat$w_missing, w_hat, w)
+
+wmean_est = mean(dat$w_imputed)
+wmean_est</code></pre>
+<pre><code>## [1] 81.63952</code></pre>
+<pre class="r"><code>res &lt;- t.test(dat$w_imputed)
+res</code></pre>
+<pre><code>## 
+##  One Sample t-test
+## 
+## data:  dat$w_imputed
+## t = 90.66, df = 99, p-value &lt; 2.2e-16
+## alternative hypothesis: true mean is not equal to 0
+## 95 percent confidence interval:
+##  79.85274 83.42631
+## sample estimates:
+## mean of x 
+##  81.63952</code></pre>
+<p>Estimated weight value is 81.64, 95%-confidence interval is 79.85-83.43. Compare this with estimated weight mean from listwise-deletion.</p>
+<pre class="r"><code>mean(dat$w_complete)</code></pre>
+<pre><code>## [1] 81.50196</code></pre>
+<pre class="r"><code>t.test(dat$w_complete)</code></pre>
+<pre><code>## 
+##  One Sample t-test
+## 
+## data:  dat$w_complete
+## t = 78.695, df = 99, p-value &lt; 2.2e-16
+## alternative hypothesis: true mean is not equal to 0
+## 95 percent confidence interval:
+##  79.44696 83.55696
+## sample estimates:
+## mean of x 
+##  81.50196</code></pre>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Here are some explanatory posts and a paper that show how the causal model can be beneficial to understanding missing mechanisms: <a href="https://www.rdatagen.net/post/musings-on-missing-data/">Musings on missing data</a>, <a href="http://jakewestfall.org/blog/index.php/2017/08/22/using-causal-graphs-to-understand-missingness-and-how-to-deal-with-it/">Using causal graphs to understand missingness and how to deal with it</a>, <a href="https://proceedings.neurips.cc/paper/2013/file/0ff8033cf9437c213ee13937b1c4c455-Paper.pdf">Graphical Models for Inference with Missing Data</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>In fact, simulation studies suggest that mean imputation is possibly the worst missing data handling method available(Enders, 2010).<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/maxR/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/maxR/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/maxR/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MKTJY4TD9M"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MKTJY4TD9M', { 'anonymize_ip': false });
+}
+</script>
+
+  </body>
+</html>
+
