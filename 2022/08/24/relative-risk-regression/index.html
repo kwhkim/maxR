@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.101.0" />
+
+
+<title>Relative risk regression (1/2) - R to the max</title>
+<meta property="og:title" content="Relative risk regression (1/2) - R to the max">
+
+
+  <link href='https://kwhkim.github.io/maxR/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/maxR/css/fonts.css" media="all">
+<link rel="stylesheet" href="/maxR/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/maxR/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/maxR/about/">About</a></li>
+    
+    <li><a href="/maxR/categories/">Categories</a></li>
+    
+    <li><a href="/maxR/tags/">Tags</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">7 min read</span>
+    
+
+    <h1 class="article-title">Relative risk regression (1/2)</h1>
+
+    
+    <span class="article-date">2022-08-24</span>
+    
+
+    <div class="article-content">
+      
+
+
+<p>When the outcome variable is binary such as alive/dead or yes/no, the most popular analytic method is <strong>logistic regression</strong>.</p>
+<p><span class="math display">\[\textrm{logit}(\mathbb{E}[y]) = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots \]</span></p>
+<p>The name “<strong>logistic</strong>” might have come from the equation below, which can be derived from applying the inverse function of logit on the both side of the equation above.</p>
+<p><span class="math display">\[ \mathbb{E}[y] = \textrm{logistic}( \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots)\]</span></p>
+<p>The link function of the <strong>logistic</strong> regression is <code>logit()</code>. We can replace it with <code>log()</code> and the result looks like the below.</p>
+<p><span class="math display">\[ \textrm{log}(\mathbb{E}[y]) = \beta_0 + \beta_1 x_1 + \cdots \]</span>
+This equation represents “<strong>Relative Risk Regression</strong>” a.k.a <strong>log-binomial regression</strong>.</p>
+<div id="risk-relative-risk" class="section level2">
+<h2>Risk, Relative Risk</h2>
+<p><strong>Risk</strong> is just another term for probability. For instance, “the probability of being hit by a lightening” can be rephrased to “the <strong>risk</strong> of being hit by a lightening”.</p>
+<p><strong>Relative risk</strong> or <strong>risk ratio(RR)</strong> is the ratio of two probability(risk). Relative risk is to compare the probabilities of two events. For example, compare the probability of being hit by a lightening when standing alone with the probability of being hit by a lightening having an umbrella open. If we divide the second probability by the first probability, we get how many times we are likely to be hit by a lightening when having an umbrella open compared to having nothing at all. This is <strong>relative risk</strong>, or <strong>risk ratio</strong>. If it is 2, in average we will get hit twice (with an umbrella open) every one hit (with nothing).</p>
+<p>The name “<strong>Relative Risk</strong> Regression” seems to come from the fact that the coefficients of relative risk regression is closely related to relative risk! Let’s imagine a relative risk regression with only one predictor <span class="math inline">\(x\)</span> , which is <span class="math inline">\(1\)</span> for having an umbrella open, and <span class="math inline">\(0\)</span> for having nothing. We can compare <span class="math inline">\(y|x=0\)</span> and <span class="math inline">\(y|x=1\)</span> .</p>
+<p><span class="math display">\[\log(y_{x=1}) = \beta_0 + \beta_1\]</span>
+<span class="math display">\[\Rightarrow y_{x=1} = \exp(\beta_0 + \beta_1)\]</span></p>
+<p><span class="math display">\[\Rightarrow y_{x=1} = \exp(\beta_0)\exp(\beta_1)\]</span></p>
+<p><span class="math display">\[y_{x=0} = \exp(\beta_0)\]</span></p>
+<p>Combining the last two equations, we can derive the following.</p>
+<p><span class="math display">\[y_{x=1}/y_{x=0}  = \exp(\beta_1)\]</span></p>
+<p>Let’s interpret <span class="math inline">\(y_{x=1}\)</span> as the probability of being hit when <span class="math inline">\(x=1\)</span> (with an umbrella open), then relative risk or risk ratio is <span class="math inline">\(\exp(\beta_1)\)</span> !</p>
+<p>The risk of being hit when having an umbrella open over the risk of being hit with nothing is exponential of <span class="math inline">\(\beta_1\)</span>, the coefficient. So if <span class="math inline">\(\beta_1\)</span> equals to 1, having an umbrella open is approximately 2.718( <span class="math inline">\(exp(1) = 2.718\cdots\)</span> ) times bigger. You are likely to be hit 2.718 times (with an umbrella opne) in average when people are hit with nothing one time.</p>
+</div>
+<div id="difficulties-of-applying-mle" class="section level2">
+<h2>Difficulties of applying MLE</h2>
+<p>Open any mathematical statistics, you will see wonderful characteristics of MLE(<strong>M</strong>aximum <strong>L</strong>ikelihood <strong>E</strong>stimate). So MLE is the way to go when we estimate the coefficients of a relative risk regression. But estimating a relative risk regression is difficult because it is optimizing the likelihood with parameters constrained. See the equation below.</p>
+<p><span class="math display">\[\log(y|x_1) = \beta_0 + \beta_1 x_1\]</span>
+<span class="math display">\[y|x_1 = \exp(\beta_0 + \beta_1 x_1)\]</span></p>
+<p>Since <span class="math inline">\(y\)</span> stands for the probability, <span class="math inline">\(\exp(\beta_0 + \beta_1 x_1)\)</span> with any possible <span class="math inline">\(x_1\)</span> can not be less than <span class="math inline">\(0\)</span> or over than <span class="math inline">\(1\)</span> ! Another problem is that since parameters can be on the edge of the possible parameter space, it becomes difficult to estimate the variance of the parameter.</p>
+</div>
+<div id="using-r-for-relative-risk-regression" class="section level2">
+<h2>Using R for <strong>Relative Risk Regression</strong></h2>
+<p>We can use the traditional function <code>glm()</code> for relative risk regression but the package <code>logbin</code> seems to offer convenience and functionality. We can choose the estimating method with the package <code>logbin</code>. Let’s get to it!</p>
+<p>First we will use Heart Attack Data(<code>data(heart)</code>). The description of the data can be found by <code>?heart</code></p>
+<blockquote>
+<p>This data set is a cross-tabulation of data on 16949 individuals who experienced a heart attack (ASSENT-2 Investigators, 1999). There are 4 categorical factors each at 3 levels, together with the number of patients and the number of deaths for each observed combination of the factors. This data set is useful for illustrating the convergence properties of glm and glm2.</p>
+</blockquote>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(tidyr)
+library(ggplot2)
+library(logbin) # https://github.com/mdonoghoe/logbin
+require(glm2, quietly = TRUE)
+data(heart)
+
+head(heart)</code></pre>
+<pre><code>##   Deaths Patients AgeGroup Severity Delay Region
+## 1     49     2611        1        1     1      1
+## 2      1       74        1        1     1      2
+## 3      2       96        1        1     1      3
+## 4     30     2888        1        1     2      1
+## 5      0       81        1        1     2      2
+## 6      8      155        1        1     2      3</code></pre>
+<p>We can fit the relative risk regression model to the data like the following. Notice that the response variable part in the fomula is <code>cbind(# of success, # of failure)</code>.</p>
+<pre class="r"><code>start.p &lt;- sum(heart$Deaths) / sum(heart$Patients)
+fit &lt;- 
+  logbin(cbind(Deaths, Patients-Deaths) ~ 
+           factor(AgeGroup) + factor(Severity) 
+           + factor(Delay) + factor(Region), 
+         data = heart)
+fit$converged</code></pre>
+<p>Using binary response variable, we can do like the following.</p>
+<pre class="r"><code>sum(duplicated(heart %&gt;% select(AgeGroup:Region)))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>heart2 &lt;- heart %&gt;% 
+  group_by(AgeGroup, Severity, Delay, Region) %&gt;%
+  summarise(data.frame(dead = c(rep(1,Deaths),
+                                rep(0,Patients-Deaths)))) %&gt;%
+  ungroup()</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;AgeGroup&#39;, &#39;Severity&#39;, &#39;Delay&#39;, &#39;Region&#39;.
+## You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>fit2 &lt;- 
+  logbin(dead ~ 
+           factor(AgeGroup) + factor(Severity) 
+           + factor(Delay) + factor(Region),
+         data = heart2)
+fit2$converged</code></pre>
+<p>For me, it took LONG!!! Here is the faster way.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
+<pre class="r"><code>start.p &lt;- sum(heart$Deaths) / sum(heart$Patients)
+fit &lt;- 
+  logbin(cbind(Deaths, Patients-Deaths) ~ 
+           factor(AgeGroup) + factor(Severity) 
+           + factor(Delay) + factor(Region), 
+         data = heart,
+         start = c(log(start.p), -rep(1e-4,8)),
+         method = &#39;glm2&#39;)
+cat(&#39;Is fit converged? &#39;, fit$converged, &#39;\n&#39;)</code></pre>
+<pre><code>## Is fit converged?  TRUE</code></pre>
+<pre class="r"><code>fit2 &lt;- 
+  logbin(dead ~ 
+           factor(AgeGroup) + factor(Severity) 
+           + factor(Delay) + factor(Region), 
+         data = heart2,
+         start = c(log(start.p), -rep(1e-4,8)),
+         method = &#39;glm2&#39;)
+cat(&#39;Is fit2 converged? &#39;, fit2$converged, &#39;\n&#39;)</code></pre>
+<pre><code>## Is fit2 converged?  TRUE</code></pre>
+<p>Here is a tip. Use the form of # of success and # of failure. Using binary response took longer!</p>
+<p>The results are almost identical</p>
+<pre class="r"><code>library(car)</code></pre>
+<pre><code>## Loading required package: carData</code></pre>
+<pre><code>## 
+## Attaching package: &#39;car&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     recode</code></pre>
+<pre class="r"><code>compareCoefs(fit, fit2)</code></pre>
+<pre><code>## Calls:
+## 1: logbin(formula = cbind(Deaths, Patients - Deaths) ~ factor(AgeGroup) + 
+##   factor(Severity) + factor(Delay) + factor(Region), data = heart, start = 
+##   c(log(start.p), -rep(1e-04, 8)), method = &quot;glm2&quot;)
+## 2: logbin(formula = dead ~ factor(AgeGroup) + factor(Severity) + 
+##   factor(Delay) + factor(Region), data = heart2, start = c(log(start.p), 
+##   -rep(1e-04, 8)), method = &quot;glm2&quot;)
+## 
+##                   Model 1 Model 2
+## (Intercept)       -4.0275 -4.0273
+## SE                 0.0889  0.0889
+##                                  
+## factor(AgeGroup)2   1.104   1.104
+## SE                  0.089   0.089
+##                                  
+## factor(AgeGroup)3  1.9268  1.9266
+## SE                 0.0924  0.0924
+##                                  
+## factor(Severity)2  0.7035  0.7035
+## SE                 0.0701  0.0701
+##                                  
+## factor(Severity)3  1.3767  1.3768
+## SE                 0.0955  0.0955
+##                                  
+## factor(Delay)2     0.0590  0.0589
+## SE                 0.0693  0.0693
+##                                  
+## factor(Delay)3     0.1718  0.1720
+## SE                 0.0808  0.0808
+##                                  
+## factor(Region)2    0.0757  0.0757
+## SE                 0.1775  0.1775
+##                                  
+## factor(Region)3     0.483   0.483
+## SE                  0.111   0.111
+## </code></pre>
+<p>The authors of <code>logbin</code> states that <code>logbin</code> solves problems that might pop up using other packages.</p>
+<p>Let’s compare!</p>
+<pre class="r"><code>start.p &lt;- sum(heart$Deaths) / sum(heart$Patients)
+t.glm &lt;- system.time(
+  fit.glm &lt;- 
+    logbin(cbind(Deaths, Patients-Deaths) ~ 
+             factor(AgeGroup) + factor(Severity) 
+             + factor(Delay) + factor(Region), 
+           data = heart,
+           start = c(log(start.p), -rep(1e-4, 8)), 
+           method = &quot;glm&quot;, 
+           maxit = 10000)
+)
+
+t.glm2 &lt;- system.time(
+  fit.glm2 &lt;- update(fit.glm, method=&#39;glm2&#39;))
+t.cem &lt;- system.time(
+  fit.cem &lt;- update(fit.glm, method = &quot;cem&quot;)
+  #fit.cem &lt;- update(fit.glm, method=&#39;cem&#39;, start = NULL)
+  )
+t.em &lt;- system.time(
+  fit.em &lt;- update(fit.glm, method = &quot;em&quot;))
+t.cem.acc &lt;- system.time(
+  fit.cem.acc &lt;- update(fit.cem, accelerate = &quot;squarem&quot;))
+t.em.acc &lt;- system.time(
+  fit.em.acc &lt;- update(fit.em, accelerate = &quot;squarem&quot;))
+
+objs = list(&quot;glm&quot;=fit.glm, 
+            &quot;glm2&quot;=fit.glm2,
+            &quot;cem&quot;=fit.cem, 
+            &quot;em&quot;=fit.em, 
+            &quot;cem.acc&quot; = fit.cem.acc, 
+            &quot;em.acc&quot; = fit.em.acc)
+params = c(&#39;converged&#39;, &quot;loglik&quot;, &quot;iter&quot;)
+
+to_dataframe = function(objs, params) {
+  #param = params[1]
+  #obj[[param]]
+  dat = data.frame(model=names(objs))
+  
+  for (param in params) {
+    dat[[param]] = sapply(objs, 
+                          function(x)
+                            x[[param]])
+  }
+  
+  return(dat)
+}
+
+dat = to_dataframe(objs, params)
+
+dat$time = c(t.glm[&#39;elapsed&#39;], 
+             t.glm2[&#39;elapsed&#39;],
+             t.cem[&#39;elapsed&#39;], 
+             t.em[&#39;elapsed&#39;], 
+             t.cem.acc[&#39;elapsed&#39;], 
+             t.em.acc[&#39;elapsed&#39;])</code></pre>
+<p>Let’s see the result.</p>
+<pre class="r"><code>print(dat)</code></pre>
+<pre><code>##     model converged    loglik         iter  time
+## 1     glm     FALSE -186.7366        10000  1.69
+## 2    glm2      TRUE -179.9016           14  0.02
+## 3     cem      TRUE -179.9016 223196, 8451 44.91
+## 4      em      TRUE -179.9016         6492  2.44
+## 5 cem.acc      TRUE -179.9016    4215, 114  4.19
+## 6  em.acc      TRUE -179.9016           81  0.10</code></pre>
+<p>The authors of the package <code>logbin</code> stated that the cem is the best but the time it took was the longest. <code>glm2</code> was the fastest and has converged. But <code>glm2</code> requires sensible start points. So we do not tell which will win when the data is large and the model is more complex.</p>
+<p>In the next post, I will explain how the model and the meaning of coefficient changes with different link functions.</p>
+</div>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p>This one uses <code>glm2</code> package. I think <code>logbin</code> is just a wrapper in this case. I omitted warnings and messages.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/maxR/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/maxR/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MKTJY4TD9M"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-MKTJY4TD9M', { 'anonymize_ip': false });
+}
+</script>
+
+  </body>
+</html>
+

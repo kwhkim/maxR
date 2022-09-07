@@ -5,7 +5,244 @@
     <link>https://kwhkim.github.io/maxR/post/</link>
     <description>Recent content in Posts on R to the max</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Fri, 25 Mar 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://kwhkim.github.io/maxR/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 24 Aug 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://kwhkim.github.io/maxR/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Relative risk regression (1/2)</title>
+      <link>https://kwhkim.github.io/maxR/2022/08/24/relative-risk-regression/</link>
+      <pubDate>Wed, 24 Aug 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://kwhkim.github.io/maxR/2022/08/24/relative-risk-regression/</guid>
+      <description>
+
+
+&lt;p&gt;When the outcome variable is binary such as alive/dead or yes/no, the most popular analytic method is &lt;strong&gt;logistic regression&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[\textrm{logit}(\mathbb{E}[y]) = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots \]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;The name “&lt;strong&gt;logistic&lt;/strong&gt;” might have come from the equation below, which can be derived from applying the inverse function of logit on the both side of the equation above.&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[ \mathbb{E}[y] = \textrm{logistic}( \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots)\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;The link function of the &lt;strong&gt;logistic&lt;/strong&gt; regression is &lt;code&gt;logit()&lt;/code&gt;. We can replace it with &lt;code&gt;log()&lt;/code&gt; and the result looks like the below.&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[ \textrm{log}(\mathbb{E}[y]) = \beta_0 + \beta_1 x_1 + \cdots \]&lt;/span&gt;
+This equation represents “&lt;strong&gt;Relative Risk Regression&lt;/strong&gt;” a.k.a &lt;strong&gt;log-binomial regression&lt;/strong&gt;.&lt;/p&gt;
+&lt;div id=&#34;risk-relative-risk&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Risk, Relative Risk&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Risk&lt;/strong&gt; is just another term for probability. For instance, “the probability of being hit by a lightening” can be rephrased to “the &lt;strong&gt;risk&lt;/strong&gt; of being hit by a lightening”.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Relative risk&lt;/strong&gt; or &lt;strong&gt;risk ratio(RR)&lt;/strong&gt; is the ratio of two probability(risk). Relative risk is to compare the probabilities of two events. For example, compare the probability of being hit by a lightening when standing alone with the probability of being hit by a lightening having an umbrella open. If we divide the second probability by the first probability, we get how many times we are likely to be hit by a lightening when having an umbrella open compared to having nothing at all. This is &lt;strong&gt;relative risk&lt;/strong&gt;, or &lt;strong&gt;risk ratio&lt;/strong&gt;. If it is 2, in average we will get hit twice (with an umbrella open) every one hit (with nothing).&lt;/p&gt;
+&lt;p&gt;The name “&lt;strong&gt;Relative Risk&lt;/strong&gt; Regression” seems to come from the fact that the coefficients of relative risk regression is closely related to relative risk! Let’s imagine a relative risk regression with only one predictor &lt;span class=&#34;math inline&#34;&gt;\(x\)&lt;/span&gt; , which is &lt;span class=&#34;math inline&#34;&gt;\(1\)&lt;/span&gt; for having an umbrella open, and &lt;span class=&#34;math inline&#34;&gt;\(0\)&lt;/span&gt; for having nothing. We can compare &lt;span class=&#34;math inline&#34;&gt;\(y|x=0\)&lt;/span&gt; and &lt;span class=&#34;math inline&#34;&gt;\(y|x=1\)&lt;/span&gt; .&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[\log(y_{x=1}) = \beta_0 + \beta_1\]&lt;/span&gt;
+&lt;span class=&#34;math display&#34;&gt;\[\Rightarrow y_{x=1} = \exp(\beta_0 + \beta_1)\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[\Rightarrow y_{x=1} = \exp(\beta_0)\exp(\beta_1)\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[y_{x=0} = \exp(\beta_0)\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Combining the last two equations, we can derive the following.&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[y_{x=1}/y_{x=0}  = \exp(\beta_1)\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Let’s interpret &lt;span class=&#34;math inline&#34;&gt;\(y_{x=1}\)&lt;/span&gt; as the probability of being hit when &lt;span class=&#34;math inline&#34;&gt;\(x=1\)&lt;/span&gt; (with an umbrella open), then relative risk or risk ratio is &lt;span class=&#34;math inline&#34;&gt;\(\exp(\beta_1)\)&lt;/span&gt; !&lt;/p&gt;
+&lt;p&gt;The risk of being hit when having an umbrella open over the risk of being hit with nothing is exponential of &lt;span class=&#34;math inline&#34;&gt;\(\beta_1\)&lt;/span&gt;, the coefficient. So if &lt;span class=&#34;math inline&#34;&gt;\(\beta_1\)&lt;/span&gt; equals to 1, having an umbrella open is approximately 2.718( &lt;span class=&#34;math inline&#34;&gt;\(exp(1) = 2.718\cdots\)&lt;/span&gt; ) times bigger. You are likely to be hit 2.718 times (with an umbrella opne) in average when people are hit with nothing one time.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;difficulties-of-applying-mle&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Difficulties of applying MLE&lt;/h2&gt;
+&lt;p&gt;Open any mathematical statistics, you will see wonderful characteristics of MLE(&lt;strong&gt;M&lt;/strong&gt;aximum &lt;strong&gt;L&lt;/strong&gt;ikelihood &lt;strong&gt;E&lt;/strong&gt;stimate). So MLE is the way to go when we estimate the coefficients of a relative risk regression. But estimating a relative risk regression is difficult because it is optimizing the likelihood with parameters constrained. See the equation below.&lt;/p&gt;
+&lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[\log(y|x_1) = \beta_0 + \beta_1 x_1\]&lt;/span&gt;
+&lt;span class=&#34;math display&#34;&gt;\[y|x_1 = \exp(\beta_0 + \beta_1 x_1)\]&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Since &lt;span class=&#34;math inline&#34;&gt;\(y\)&lt;/span&gt; stands for the probability, &lt;span class=&#34;math inline&#34;&gt;\(\exp(\beta_0 + \beta_1 x_1)\)&lt;/span&gt; with any possible &lt;span class=&#34;math inline&#34;&gt;\(x_1\)&lt;/span&gt; can not be less than &lt;span class=&#34;math inline&#34;&gt;\(0\)&lt;/span&gt; or over than &lt;span class=&#34;math inline&#34;&gt;\(1\)&lt;/span&gt; ! Another problem is that since parameters can be on the edge of the possible parameter space, it becomes difficult to estimate the variance of the parameter.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;using-r-for-relative-risk-regression&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Using R for &lt;strong&gt;Relative Risk Regression&lt;/strong&gt;&lt;/h2&gt;
+&lt;p&gt;We can use the traditional function &lt;code&gt;glm()&lt;/code&gt; for relative risk regression but the package &lt;code&gt;logbin&lt;/code&gt; seems to offer convenience and functionality. We can choose the estimating method with the package &lt;code&gt;logbin&lt;/code&gt;. Let’s get to it!&lt;/p&gt;
+&lt;p&gt;First we will use Heart Attack Data(&lt;code&gt;data(heart)&lt;/code&gt;). The description of the data can be found by &lt;code&gt;?heart&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This data set is a cross-tabulation of data on 16949 individuals who experienced a heart attack (ASSENT-2 Investigators, 1999). There are 4 categorical factors each at 3 levels, together with the number of patients and the number of deaths for each observed combination of the factors. This data set is useful for illustrating the convergence properties of glm and glm2.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(dplyr)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## Attaching package: &amp;#39;dplyr&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following objects are masked from &amp;#39;package:stats&amp;#39;:
+## 
+##     filter, lag&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following objects are masked from &amp;#39;package:base&amp;#39;:
+## 
+##     intersect, setdiff, setequal, union&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tidyr)
+library(ggplot2)
+library(logbin) # https://github.com/mdonoghoe/logbin
+require(glm2, quietly = TRUE)
+data(heart)
+
+head(heart)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##   Deaths Patients AgeGroup Severity Delay Region
+## 1     49     2611        1        1     1      1
+## 2      1       74        1        1     1      2
+## 3      2       96        1        1     1      3
+## 4     30     2888        1        1     2      1
+## 5      0       81        1        1     2      2
+## 6      8      155        1        1     2      3&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can fit the relative risk regression model to the data like the following. Notice that the response variable part in the fomula is &lt;code&gt;cbind(# of success, # of failure)&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;start.p &amp;lt;- sum(heart$Deaths) / sum(heart$Patients)
+fit &amp;lt;- 
+  logbin(cbind(Deaths, Patients-Deaths) ~ 
+           factor(AgeGroup) + factor(Severity) 
+           + factor(Delay) + factor(Region), 
+         data = heart)
+fit$converged&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Using binary response variable, we can do like the following.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;sum(duplicated(heart %&amp;gt;% select(AgeGroup:Region)))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 0&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;heart2 &amp;lt;- heart %&amp;gt;% 
+  group_by(AgeGroup, Severity, Delay, Region) %&amp;gt;%
+  summarise(data.frame(dead = c(rep(1,Deaths),
+                                rep(0,Patients-Deaths)))) %&amp;gt;%
+  ungroup()&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## `summarise()` has grouped output by &amp;#39;AgeGroup&amp;#39;, &amp;#39;Severity&amp;#39;, &amp;#39;Delay&amp;#39;, &amp;#39;Region&amp;#39;.
+## You can override using the `.groups` argument.&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;fit2 &amp;lt;- 
+  logbin(dead ~ 
+           factor(AgeGroup) + factor(Severity) 
+           + factor(Delay) + factor(Region),
+         data = heart2)
+fit2$converged&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;For me, it took LONG!!! Here is the faster way.&lt;a href=&#34;#fn1&#34; class=&#34;footnote-ref&#34; id=&#34;fnref1&#34;&gt;&lt;sup&gt;1&lt;/sup&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;start.p &amp;lt;- sum(heart$Deaths) / sum(heart$Patients)
+fit &amp;lt;- 
+  logbin(cbind(Deaths, Patients-Deaths) ~ 
+           factor(AgeGroup) + factor(Severity) 
+           + factor(Delay) + factor(Region), 
+         data = heart,
+         start = c(log(start.p), -rep(1e-4,8)),
+         method = &amp;#39;glm2&amp;#39;)
+cat(&amp;#39;Is fit converged? &amp;#39;, fit$converged, &amp;#39;\n&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Is fit converged?  TRUE&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;fit2 &amp;lt;- 
+  logbin(dead ~ 
+           factor(AgeGroup) + factor(Severity) 
+           + factor(Delay) + factor(Region), 
+         data = heart2,
+         start = c(log(start.p), -rep(1e-4,8)),
+         method = &amp;#39;glm2&amp;#39;)
+cat(&amp;#39;Is fit2 converged? &amp;#39;, fit2$converged, &amp;#39;\n&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Is fit2 converged?  TRUE&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here is a tip. Use the form of # of success and # of failure. Using binary response took longer!&lt;/p&gt;
+&lt;p&gt;The results are almost identical&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(car)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: carData&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## Attaching package: &amp;#39;car&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following object is masked from &amp;#39;package:dplyr&amp;#39;:
+## 
+##     recode&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;compareCoefs(fit, fit2)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Calls:
+## 1: logbin(formula = cbind(Deaths, Patients - Deaths) ~ factor(AgeGroup) + 
+##   factor(Severity) + factor(Delay) + factor(Region), data = heart, start = 
+##   c(log(start.p), -rep(1e-04, 8)), method = &amp;quot;glm2&amp;quot;)
+## 2: logbin(formula = dead ~ factor(AgeGroup) + factor(Severity) + 
+##   factor(Delay) + factor(Region), data = heart2, start = c(log(start.p), 
+##   -rep(1e-04, 8)), method = &amp;quot;glm2&amp;quot;)
+## 
+##                   Model 1 Model 2
+## (Intercept)       -4.0275 -4.0273
+## SE                 0.0889  0.0889
+##                                  
+## factor(AgeGroup)2   1.104   1.104
+## SE                  0.089   0.089
+##                                  
+## factor(AgeGroup)3  1.9268  1.9266
+## SE                 0.0924  0.0924
+##                                  
+## factor(Severity)2  0.7035  0.7035
+## SE                 0.0701  0.0701
+##                                  
+## factor(Severity)3  1.3767  1.3768
+## SE                 0.0955  0.0955
+##                                  
+## factor(Delay)2     0.0590  0.0589
+## SE                 0.0693  0.0693
+##                                  
+## factor(Delay)3     0.1718  0.1720
+## SE                 0.0808  0.0808
+##                                  
+## factor(Region)2    0.0757  0.0757
+## SE                 0.1775  0.1775
+##                                  
+## factor(Region)3     0.483   0.483
+## SE                  0.111   0.111
+## &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The authors of &lt;code&gt;logbin&lt;/code&gt; states that &lt;code&gt;logbin&lt;/code&gt; solves problems that might pop up using other packages.&lt;/p&gt;
+&lt;p&gt;Let’s compare!&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;start.p &amp;lt;- sum(heart$Deaths) / sum(heart$Patients)
+t.glm &amp;lt;- system.time(
+  fit.glm &amp;lt;- 
+    logbin(cbind(Deaths, Patients-Deaths) ~ 
+             factor(AgeGroup) + factor(Severity) 
+             + factor(Delay) + factor(Region), 
+           data = heart,
+           start = c(log(start.p), -rep(1e-4, 8)), 
+           method = &amp;quot;glm&amp;quot;, 
+           maxit = 10000)
+)
+
+t.glm2 &amp;lt;- system.time(
+  fit.glm2 &amp;lt;- update(fit.glm, method=&amp;#39;glm2&amp;#39;))
+t.cem &amp;lt;- system.time(
+  fit.cem &amp;lt;- update(fit.glm, method = &amp;quot;cem&amp;quot;)
+  #fit.cem &amp;lt;- update(fit.glm, method=&amp;#39;cem&amp;#39;, start = NULL)
+  )
+t.em &amp;lt;- system.time(
+  fit.em &amp;lt;- update(fit.glm, method = &amp;quot;em&amp;quot;))
+t.cem.acc &amp;lt;- system.time(
+  fit.cem.acc &amp;lt;- update(fit.cem, accelerate = &amp;quot;squarem&amp;quot;))
+t.em.acc &amp;lt;- system.time(
+  fit.em.acc &amp;lt;- update(fit.em, accelerate = &amp;quot;squarem&amp;quot;))
+
+objs = list(&amp;quot;glm&amp;quot;=fit.glm, 
+            &amp;quot;glm2&amp;quot;=fit.glm2,
+            &amp;quot;cem&amp;quot;=fit.cem, 
+            &amp;quot;em&amp;quot;=fit.em, 
+            &amp;quot;cem.acc&amp;quot; = fit.cem.acc, 
+            &amp;quot;em.acc&amp;quot; = fit.em.acc)
+params = c(&amp;#39;converged&amp;#39;, &amp;quot;loglik&amp;quot;, &amp;quot;iter&amp;quot;)
+
+to_dataframe = function(objs, params) {
+  #param = params[1]
+  #obj[[param]]
+  dat = data.frame(model=names(objs))
+  
+  for (param in params) {
+    dat[[param]] = sapply(objs, 
+                          function(x)
+                            x[[param]])
+  }
+  
+  return(dat)
+}
+
+dat = to_dataframe(objs, params)
+
+dat$time = c(t.glm[&amp;#39;elapsed&amp;#39;], 
+             t.glm2[&amp;#39;elapsed&amp;#39;],
+             t.cem[&amp;#39;elapsed&amp;#39;], 
+             t.em[&amp;#39;elapsed&amp;#39;], 
+             t.cem.acc[&amp;#39;elapsed&amp;#39;], 
+             t.em.acc[&amp;#39;elapsed&amp;#39;])&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let’s see the result.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;print(dat)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##     model converged    loglik         iter  time
+## 1     glm     FALSE -186.7366        10000  1.69
+## 2    glm2      TRUE -179.9016           14  0.02
+## 3     cem      TRUE -179.9016 223196, 8451 44.91
+## 4      em      TRUE -179.9016         6492  2.44
+## 5 cem.acc      TRUE -179.9016    4215, 114  4.19
+## 6  em.acc      TRUE -179.9016           81  0.10&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The authors of the package &lt;code&gt;logbin&lt;/code&gt; stated that the cem is the best but the time it took was the longest. &lt;code&gt;glm2&lt;/code&gt; was the fastest and has converged. But &lt;code&gt;glm2&lt;/code&gt; requires sensible start points. So we do not tell which will win when the data is large and the model is more complex.&lt;/p&gt;
+&lt;p&gt;In the next post, I will explain how the model and the meaning of coefficient changes with different link functions.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;footnotes footnotes-end-of-document&#34;&gt;
+&lt;hr /&gt;
+&lt;ol&gt;
+&lt;li id=&#34;fn1&#34;&gt;&lt;p&gt;This one uses &lt;code&gt;glm2&lt;/code&gt; package. I think &lt;code&gt;logbin&lt;/code&gt; is just a wrapper in this case. I omitted warnings and messages.&lt;a href=&#34;#fnref1&#34; class=&#34;footnote-back&#34;&gt;↩︎&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+</description>
+      
+      
+    </item>
+    
     <item>
       <title>Why mean substition is a bad idea, almost always</title>
       <link>https://kwhkim.github.io/maxR/2022/03/25/why-single-mean-imputation-is-a-bad-idea-almost-always/</link>
