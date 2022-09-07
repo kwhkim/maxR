@@ -2,25 +2,31 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://kwhkim.github.io/maxR/tags/binary/</loc>
+    <lastmod>2022-08-24T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kwhkim.github.io/maxR/categories/</loc>
+    <lastmod>2022-08-24T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>https://kwhkim.github.io/maxR/post/</loc>
+    <lastmod>2022-08-24T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kwhkim.github.io/maxR/categories/r/</loc>
     <lastmod>2022-08-24T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kwhkim.github.io/maxR/</loc>
     <lastmod>2022-08-24T00:00:00+00:00</lastmod>
   </url><url>
+    <loc>https://kwhkim.github.io/maxR/tags/regression/</loc>
+    <lastmod>2022-08-24T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>https://kwhkim.github.io/maxR/2022/08/24/relative-risk-regression/</loc>
     <lastmod>2022-08-24T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kwhkim.github.io/maxR/categories/</loc>
-    <lastmod>2022-03-25T00:00:00+00:00</lastmod>
+    <loc>https://kwhkim.github.io/maxR/tags/</loc>
+    <lastmod>2022-08-24T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kwhkim.github.io/maxR/tags/missing/</loc>
-    <lastmod>2022-03-25T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kwhkim.github.io/maxR/categories/r/</loc>
-    <lastmod>2022-03-25T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kwhkim.github.io/maxR/tags/</loc>
     <lastmod>2022-03-25T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kwhkim.github.io/maxR/2022/03/25/why-single-mean-imputation-is-a-bad-idea-almost-always/</loc>

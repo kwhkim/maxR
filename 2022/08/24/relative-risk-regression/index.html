@@ -102,6 +102,9 @@ This equation represents “<strong>Relative Risk Regression</strong>” a.k.a <
 <p><span class="math display">\[\log(y|x_1) = \beta_0 + \beta_1 x_1\]</span>
 <span class="math display">\[y|x_1 = \exp(\beta_0 + \beta_1 x_1)\]</span></p>
 <p>Since <span class="math inline">\(y\)</span> stands for the probability, <span class="math inline">\(\exp(\beta_0 + \beta_1 x_1)\)</span> with any possible <span class="math inline">\(x_1\)</span> can not be less than <span class="math inline">\(0\)</span> or over than <span class="math inline">\(1\)</span> ! Another problem is that since parameters can be on the edge of the possible parameter space, it becomes difficult to estimate the variance of the parameter.</p>
+<ul>
+<li>[<strong>AD</strong>] Book for <strong>R power users</strong> : <a href="http://books.sumeun.org/?p=190">Data Analysis with R: Data Preprocessing and Visualization</a></li>
+</ul>
 </div>
 <div id="using-r-for-relative-risk-regression" class="section level2">
 <h2>Using R for <strong>Relative Risk Regression</strong></h2>
@@ -283,12 +286,12 @@ dat$time = c(t.glm[&#39;elapsed&#39;],
 <p>Let’s see the result.</p>
 <pre class="r"><code>print(dat)</code></pre>
 <pre><code>##     model converged    loglik         iter  time
-## 1     glm     FALSE -186.7366        10000  1.69
-## 2    glm2      TRUE -179.9016           14  0.02
-## 3     cem      TRUE -179.9016 223196, 8451 44.91
-## 4      em      TRUE -179.9016         6492  2.44
-## 5 cem.acc      TRUE -179.9016    4215, 114  4.19
-## 6  em.acc      TRUE -179.9016           81  0.10</code></pre>
+## 1     glm     FALSE -186.7366        10000  1.61
+## 2    glm2      TRUE -179.9016           14  0.00
+## 3     cem      TRUE -179.9016 223196, 8451 42.47
+## 4      em      TRUE -179.9016         6492  2.34
+## 5 cem.acc      TRUE -179.9016    4215, 114  3.78
+## 6  em.acc      TRUE -179.9016           81  0.09</code></pre>
 <p>The authors of the package <code>logbin</code> stated that the cem is the best but the time it took was the longest. <code>glm2</code> was the fastest and has converged. But <code>glm2</code> requires sensible start points. So we do not tell which will win when the data is large and the model is more complex.</p>
 <p>In the next post, I will explain how the model and the meaning of coefficient changes with different link functions.</p>
 </div>

@@ -42,6 +42,9 @@ This equation represents “&lt;strong&gt;Relative Risk Regression&lt;/strong&gt
 &lt;p&gt;&lt;span class=&#34;math display&#34;&gt;\[\log(y|x_1) = \beta_0 + \beta_1 x_1\]&lt;/span&gt;
 &lt;span class=&#34;math display&#34;&gt;\[y|x_1 = \exp(\beta_0 + \beta_1 x_1)\]&lt;/span&gt;&lt;/p&gt;
 &lt;p&gt;Since &lt;span class=&#34;math inline&#34;&gt;\(y\)&lt;/span&gt; stands for the probability, &lt;span class=&#34;math inline&#34;&gt;\(\exp(\beta_0 + \beta_1 x_1)\)&lt;/span&gt; with any possible &lt;span class=&#34;math inline&#34;&gt;\(x_1\)&lt;/span&gt; can not be less than &lt;span class=&#34;math inline&#34;&gt;\(0\)&lt;/span&gt; or over than &lt;span class=&#34;math inline&#34;&gt;\(1\)&lt;/span&gt; ! Another problem is that since parameters can be on the edge of the possible parameter space, it becomes difficult to estimate the variance of the parameter.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;[&lt;strong&gt;AD&lt;/strong&gt;] Book for &lt;strong&gt;R power users&lt;/strong&gt; : &lt;a href=&#34;http://books.sumeun.org/?p=190&#34;&gt;Data Analysis with R: Data Preprocessing and Visualization&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/div&gt;
 &lt;div id=&#34;using-r-for-relative-risk-regression&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Using R for &lt;strong&gt;Relative Risk Regression&lt;/strong&gt;&lt;/h2&gt;
@@ -223,12 +226,12 @@ dat$time = c(t.glm[&amp;#39;elapsed&amp;#39;],
 &lt;p&gt;Let’s see the result.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;print(dat)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;##     model converged    loglik         iter  time
-## 1     glm     FALSE -186.7366        10000  1.69
-## 2    glm2      TRUE -179.9016           14  0.02
-## 3     cem      TRUE -179.9016 223196, 8451 44.91
-## 4      em      TRUE -179.9016         6492  2.44
-## 5 cem.acc      TRUE -179.9016    4215, 114  4.19
-## 6  em.acc      TRUE -179.9016           81  0.10&lt;/code&gt;&lt;/pre&gt;
+## 1     glm     FALSE -186.7366        10000  1.61
+## 2    glm2      TRUE -179.9016           14  0.00
+## 3     cem      TRUE -179.9016 223196, 8451 42.47
+## 4      em      TRUE -179.9016         6492  2.34
+## 5 cem.acc      TRUE -179.9016    4215, 114  3.78
+## 6  em.acc      TRUE -179.9016           81  0.09&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The authors of the package &lt;code&gt;logbin&lt;/code&gt; stated that the cem is the best but the time it took was the longest. &lt;code&gt;glm2&lt;/code&gt; was the fastest and has converged. But &lt;code&gt;glm2&lt;/code&gt; requires sensible start points. So we do not tell which will win when the data is large and the model is more complex.&lt;/p&gt;
 &lt;p&gt;In the next post, I will explain how the model and the meaning of coefficient changes with different link functions.&lt;/p&gt;
 &lt;/div&gt;
@@ -240,6 +243,12 @@ dat$time = c(t.glm[&amp;#39;elapsed&amp;#39;],
 &lt;/div&gt;
 </description>
       
+            <tag>regression</tag>
+      
+            <tag>binary</tag>
+      
+      
+            <category>R</category>
       
     </item>
     
